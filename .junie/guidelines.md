@@ -11,3 +11,5 @@ This document serves as the primary entry point for coding agents. It contains t
 
 Instructions:
 - Use shadcn/ui only
+
+Verify changes to the UI by using Playwright MCP, navigating to http://localhost:5173, and exploring the app via UI. 
