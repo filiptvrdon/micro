@@ -1,19 +1,37 @@
 import { useEffect, useState } from "react"
-import { Outlet, NavLink } from "react-router-dom"
-import { Home, User, PlusSquare, MoreHorizontal } from "lucide-react"
+import { Outlet, NavLink, Navigate } from "react-router-dom"
+import { Home, User, PlusSquare, MoreHorizontal, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { useUserRepository } from "@/providers/user-provider"
 import type { User as UserType } from "@/domain/users/types/user"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuth } from "@/providers/auth-provider"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function AppLayout() {
+  const { session, isLoading, logout } = useAuth()
   const userRepository = useUserRepository()
   const [currentUser, setCurrentUser] = useState<UserType | null>(null)
 
   useEffect(() => {
-    userRepository.getCurrentUser().then(setCurrentUser)
-  }, [userRepository])
+    if (session) {
+      userRepository.getCurrentUser(session.userId).then(setCurrentUser)
+    }
+  }, [userRepository, session])
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  }
+
+  if (!session) {
+    return <Navigate to="/login" replace />
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center">
@@ -22,9 +40,19 @@ export function AppLayout() {
         <h1 className="text-2xl font-semibold tracking-tight">Micro</h1>
         <div className="flex items-center space-x-2">
           <ThemeToggle />
-          <Button variant="ghost" size="icon">
-            <MoreHorizontal className="h-5 w-5" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => logout()}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 

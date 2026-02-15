@@ -25,7 +25,10 @@ const MOCK_USERS: User[] = [
 ]
 
 export class StubUserRepository implements UserRepository {
-  async getCurrentUser(): Promise<User | null> {
+  async getCurrentUser(userId?: string): Promise<User | null> {
+    if (userId) {
+      return { ...MOCK_CURRENT_USER, id: userId }
+    }
     return MOCK_CURRENT_USER
   }
 

@@ -3,17 +3,22 @@ import type { UserRepository } from "./user-repository.interface"
 import { prisma } from "../../prisma/client"
 
 export class PgUserRepository implements UserRepository {
-  async getCurrentUser(): Promise<User | null> {
-    // For now, we return a hardcoded user from the DB or create it if it doesn't exist
-    // In a real app, this would come from session/auth
-    let user = await prisma.user.findFirst()
+  async getCurrentUser(userId?: string): Promise<User | null> {
+    if (!userId) return null;
+
+    let user = await prisma.user.findUnique({
+      where: { id: userId },
+    })
 
     if (!user) {
+      // For new users from Hanko, we create a profile
+      // In a real app, we might want to ask for a username/display name
+      // For now, we use a placeholder based on the ID
       user = await prisma.user.create({
         data: {
-          username: "johndoe",
-          displayName: "John Doe",
-          bio: "Software Engineer",
+          id: userId,
+          username: `user_${userId.slice(0, 8)}`,
+          displayName: `User ${userId.slice(0, 4)}`,
         },
       })
     }
