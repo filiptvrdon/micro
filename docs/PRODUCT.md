@@ -4,35 +4,22 @@
 ---
 
 ## 1. Product Thesis
+Core idea:
+> A place to share training footage and reflections without algorithmic manipulation.
 
-Mainstream social platforms optimize for:
-
-* engagement
-* stimulation
-* infinite scroll
-* emotional volatility
-
-This product optimizes for:
-
+We optimize for:
 * signal over noise
 * meaningful updates
 * finite consumption
 * focused communities
 
-Core idea:
-
-> A place to share training footage and reflections without algorithmic manipulation.
-
-When you reach the end of the feed, you’re done.
-
-No slot machine mechanics.
+When you reach the end of the feed, you’re done. No slot machine mechanics.
 
 ---
 
 ## 2. Target Use Case
 
 Primary audience:
-
 * Athletes
 * Lifters
 * Runners
@@ -41,23 +28,19 @@ Primary audience:
 * Hobbyists who train consistently
 
 Primary behavior:
-
 * Share short training videos or photos
-* Add short–mid reflections (what worked, what didn’t, lesson learned)
+* Add short–mid length text reflections (what worked, what didn’t, lesson learned)
 * Follow friends
-* Check in once per day
+* Check in shortly to catch up with their progress, no doom scrolling
 
 This is not for:
-
 * Influencers
 * Viral growth
 * Performance entertainment
 * “Content creation economy”
 
 This is for:
-
 > Practice documentation + community visibility.
-
 That’s a very different product from Instagram.
 
 ---
@@ -174,6 +157,27 @@ The app should feel like:
 5. No ads.
 6. No growth-hacking mechanics.
 7. Simple moderation.
+
+### 6.1 MVP Scope
+
+#### Included
+* Mobile-first web app (PWA)
+* User accounts
+* Photo upload
+* Short caption
+* Chronological feed
+* Delete own content
+* Basic moderation tools
+
+#### Excluded (MVP)
+* Video
+* Stories
+* Direct messaging
+* Algorithmic ranking
+* Ads
+* Notifications
+* Advanced analytics
+* Engagement gamification
 
 These constraints are product features.
 
