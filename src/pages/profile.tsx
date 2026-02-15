@@ -1,9 +1,104 @@
+import { useEffect, useState } from "react"
+import { useUserRepository } from "@/features/users/context/user-context"
+import type { UserProfile } from "@/features/users/types/user"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { Grid, List, Settings } from "lucide-react"
+
 export function ProfilePage() {
+  const userRepository = useUserRepository()
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const currentUser = await userRepository.getCurrentUser()
+      if (currentUser) {
+        const userProfile = await userRepository.getUserProfile(currentUser.username)
+        setProfile(userProfile)
+      }
+      setLoading(false)
+    }
+
+    fetchProfile()
+  }, [userRepository])
+
+  if (loading) {
+    return <div className="py-20 text-center">Loading profile...</div>
+  }
+
+  if (!profile) {
+    return <div className="py-20 text-center">User not found</div>
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center py-20 space-y-4">
-      <h2 className="text-xl font-semibold">Profile</h2>
-      <p className="text-muted-foreground text-center max-w-[280px]">
-        Your training history and statistics will appear here.
+    <div className="space-y-8">
+      {/* Profile Header */}
+      <div className="flex flex-col items-center space-y-4 pt-4">
+        <Avatar className="h-24 w-24">
+          <AvatarImage src={profile.avatarUrl} />
+          <AvatarFallback className="text-2xl">{profile.displayName[0]}</AvatarFallback>
+        </Avatar>
+        
+        <div className="text-center space-y-1">
+          <h2 className="text-xl font-bold tracking-tight">{profile.displayName}</h2>
+          <p className="text-sm text-muted-foreground">@{profile.username}</p>
+        </div>
+
+        {profile.bio && (
+          <p className="text-sm text-center max-w-[280px] leading-relaxed">
+            {profile.bio}
+          </p>
+        )}
+
+        <div className="flex space-x-2 w-full pt-2">
+          <Button variant="outline" className="flex-1 rounded-full">
+            Edit Profile
+          </Button>
+          <Button variant="outline" size="icon" className="rounded-full">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="flex justify-around py-2">
+        <div className="text-center">
+          <div className="font-bold">{profile.postCount}</div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider">Posts</div>
+        </div>
+        <div className="text-center">
+          <div className="font-bold">{profile.followerCount}</div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider">Followers</div>
+        </div>
+        <div className="text-center">
+          <div className="font-bold">{profile.followingCount}</div>
+          <div className="text-xs text-muted-foreground uppercase tracking-wider">Following</div>
+        </div>
+      </div>
+
+      <Separator className="opacity-50" />
+
+      {/* Profile Feed Toggle (Simplified for now) */}
+      <div className="flex justify-center space-x-12">
+        <Button variant="ghost" size="sm" className="text-primary border-b-2 border-primary rounded-none px-4 h-10">
+          <Grid className="h-5 w-5" />
+        </Button>
+        <Button variant="ghost" size="sm" className="text-muted-foreground rounded-none px-4 h-10">
+          <List className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Empty State / Grid Placeholder */}
+      <div className="grid grid-cols-3 gap-1">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="aspect-square bg-muted rounded-sm animate-pulse" />
+        ))}
+      </div>
+      
+      <p className="text-xs text-center text-muted-foreground py-8">
+        No training posts yet.
       </p>
     </div>
   )

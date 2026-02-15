@@ -12,4 +12,8 @@ This document serves as the primary entry point for coding agents. It contains t
 Instructions:
 - Use shadcn/ui only
 
-Verify changes to the UI by using Playwright MCP, navigating to http://localhost:5173, and exploring the app via UI. 
+Verify changes to the UI by using Playwright MCP, navigating to http://localhost:5173, and exploring the app via UI.
+
+For now, all repositories should be defined and referenced as interfaces so that the implementations can be swapped out.
+
+after each finished task, ask for permission to commit
