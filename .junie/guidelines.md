@@ -19,4 +19,14 @@ Instructions:
     - `src/components/ui/`: Shared shadcn components.
 - For now, all repositories should be defined and referenced as interfaces so that the implementations can be swapped out.
 
+## 🛡 Architectural Enforcement
+We use `dependency-cruiser` to enforce the **Domain-Driven Feature** architecture. 
+- **Command**: `npm run check-arch`
+- **Rules**:
+    - `domain` MUST NOT depend on `features`, `pages`, `layouts`, or `providers`.
+    - `features` MUST NOT depend on other `features` (to prevent coupling).
+    - `components/ui` MUST be "leaf" components (no business logic/domain/features).
+    - `providers` MUST NOT depend on `pages` or `layouts`.
+- All PRs/changes should pass `npm run check-arch`.
+
 after each finished task, ask for permission to commit
