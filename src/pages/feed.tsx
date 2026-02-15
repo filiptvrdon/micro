@@ -1,9 +1,9 @@
 import { PostCard } from "@/features/feed/post-card"
 import { CaughtUp } from "@/features/feed/caught-up"
 import { Separator } from "@/components/ui/separator"
-import { usePostRepository } from "@/features/feed/context/post-context"
+import { usePostRepository } from "@/providers/post-provider"
 import { useEffect, useState } from "react"
-import type { Post } from "@/features/feed/types/post"
+import type { Post } from "@/domain/posts/types/post"
 
 export function FeedPage() {
   const postRepository = usePostRepository()

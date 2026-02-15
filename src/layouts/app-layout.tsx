@@ -3,8 +3,8 @@ import { Outlet, NavLink } from "react-router-dom"
 import { Home, User, PlusSquare, MoreHorizontal } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
-import { useUserRepository } from "@/features/users/context/user-context"
-import type { User as UserType } from "@/features/users/types/user"
+import { useUserRepository } from "@/providers/user-provider"
+import type { User as UserType } from "@/domain/users/types/user"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function AppLayout() {

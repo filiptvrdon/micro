@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react"
-import type { UserRepository } from "../repositories/user-repository.interface"
-import { StubUserRepository } from "../repositories/stub-user.repository"
+import type { UserRepository } from "@/domain/users/repositories/user-repository.interface"
+import { StubUserRepository } from "@/domain/users/repositories/stub-user.repository"
 
 const userRepository = new StubUserRepository()
 

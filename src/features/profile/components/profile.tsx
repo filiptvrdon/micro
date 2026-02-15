@@ -2,8 +2,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Grid, List, Settings } from "lucide-react"
-import type { UserProfile } from "@/features/users/types/user"
-import type { Post } from "@/features/feed/types/post"
+import type { UserProfile } from "@/domain/users/types/user"
+import type { Post } from "@/domain/posts/types/post"
 
 interface ProfileProps {
   profile: UserProfile

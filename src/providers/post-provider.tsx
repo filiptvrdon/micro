@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react"
-import type { PostRepository } from "../repositories/post-repository.interface"
-import { StubPostRepository } from "../repositories/stub-post.repository"
+import type { PostRepository } from "@/domain/posts/repositories/post-repository.interface"
+import { StubPostRepository } from "@/domain/posts/repositories/stub-post.repository"
 
 const postRepository = new StubPostRepository()
 

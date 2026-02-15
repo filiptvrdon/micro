@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
-import { useUserRepository } from "@/features/users/context/user-context"
-import { usePostRepository } from "@/features/feed/context/post-context"
-import type { UserProfile } from "@/features/users/types/user"
-import type { Post } from "@/features/feed/types/post"
+import { useUserRepository } from "@/providers/user-provider"
+import { usePostRepository } from "@/providers/post-provider"
+import type { UserProfile } from "@/domain/users/types/user"
+import type { Post } from "@/domain/posts/types/post"
 import { Profile } from "@/features/profile/components/profile"
 
 export function ProfilePage() {
