@@ -86,7 +86,7 @@ export class PgUserRepository implements UserRepository {
 
     if (!user) return []
 
-    return user.following.map((u) => ({
+    return user.following.map((u: any) => ({
       id: u.id,
       username: u.username,
       displayName: u.displayName,

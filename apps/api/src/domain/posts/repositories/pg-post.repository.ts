@@ -13,7 +13,7 @@ export class PgPostRepository implements PostRepository {
       },
     })
 
-    return posts.map((post) => ({
+    return posts.map((post: any) => ({
       id: post.id,
       userId: post.userId,
       authorName: post.author.displayName,
@@ -38,7 +38,7 @@ export class PgPostRepository implements PostRepository {
       },
     })
 
-    return posts.map((post) => ({
+    return posts.map((post: any) => ({
       id: post.id,
       userId: post.userId,
       authorName: post.author.displayName,
