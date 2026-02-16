@@ -7,7 +7,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/web/*"],
+      "@/domain/*": ["./src/web/domain/*"]
     }
   }
 }

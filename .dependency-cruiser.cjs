@@ -6,10 +6,10 @@ module.exports = {
       severity: 'error',
       comment: 'The domain layer should be independent of the UI layer (features, pages, layouts).',
       from: {
-        path: '^src/domain'
+        path: '^src/(api/domain|web/domain)'
       },
       to: {
-        path: '^src/(features|pages|layouts|providers)'
+        path: '^src/web/(features|pages|layouts|providers)'
       }
     },
     {
@@ -17,11 +17,11 @@ module.exports = {
       severity: 'error',
       comment: 'Features should be self-contained to prevent tight coupling. If you need shared logic, move it to the domain or a shared component.',
       from: {
-        path: '^src/features/([^/]+)'
+        path: '^src/web/features/([^/]+)'
       },
       to: {
-        path: '^src/features/([^/]+)',
-        pathNot: '^src/features/$1'
+        path: '^src/web/features/([^/]+)',
+        pathNot: '^src/web/features/$1'
       }
     },
     {
@@ -29,10 +29,10 @@ module.exports = {
       severity: 'error',
       comment: 'Shared UI components should not depend on domain logic or features. They should be pure presentational components.',
       from: {
-        path: '^src/components/ui'
+        path: '^src/web/components/ui'
       },
       to: {
-        path: '^src/(domain|features|pages|providers)'
+        path: '^src/(api/domain|web/domain|web/features|web/pages|web/providers)'
       }
     },
     {
@@ -40,10 +40,22 @@ module.exports = {
       severity: 'error',
       comment: 'Providers should be low-level and not depend on pages or layouts.',
       from: {
-        path: '^src/providers'
+        path: '^src/web/providers'
       },
       to: {
-        path: '^src/(pages|layouts)'
+        path: '^src/web/(pages|layouts)'
+      }
+    },
+    {
+      name: 'web-should-not-depend-on-api-internals',
+      severity: 'error',
+      comment: 'Web should only depend on shared types/interfaces from api/domain, not Prisma or repository implementations.',
+      from: {
+        path: '^src/web'
+      },
+      to: {
+        path: '^src/api',
+        pathNot: '^src/api/domain/([^/]+)/(types|repositories/[^/]+\\.interface\\.ts$)'
       }
     },
     {
@@ -241,6 +253,9 @@ module.exports = {
     }
   ],
   options: {
+    tsConfig: {
+      fileName: 'tsconfig.json'
+    },
     // Which modules not to follow further when encountered
     doNotFollow: {
       // path: an array of regular expressions in strings to match against

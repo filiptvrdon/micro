@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "outDir": "./dist/api",
+    "paths": {
+      "@/*": ["./src/api/*"]
+    }
+  },
+  "include": ["src/api"]
+}

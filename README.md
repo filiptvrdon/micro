@@ -1,73 +1,76 @@
-# React + TypeScript + Vite
+# Micro
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lightweight social media application built with a modern split architecture (Frontend + Backend).
 
-Currently, two official plugins are available:
+## 🏗 Architecture
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The project follows a **Domain-Driven Feature** architecture and is split into two main parts:
 
-## React Compiler
+- **`src/web`**: Pure React frontend (Vite, shadcn/ui).
+- **`src/api`**: Lightweight Hono backend server (Node.js, Prisma).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Getting Started
 
-## Expanding the ESLint configuration
+### Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Node.js**: v18 or later.
+- **PostgreSQL**: A running instance (or use the provided `docker-compose.yml`).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Setup
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. **Environment Variables:**
+   Create a `.env` file in the root directory (you can copy `.env.example` if it exists, or follow the template below):
+   ```env
+   DATABASE_URL="postgresql://user:password@localhost:5432/micro_db?schema=public"
+   HANKO_AUTH_URL="https://your-hanko-url.hanko.io"
+   VITE_API_URL="http://localhost:3000"
+   ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+3. **Database Initialization:**
+   ```bash
+   npx prisma migrate dev
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Development
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+You need to run both the backend and the frontend simultaneously.
+
+- **Start Backend (`api`):**
+  ```bash
+  npm run dev:api
+  ```
+  The API will be available at `http://localhost:3000`.
+
+- **Start Frontend (`web`):**
+  ```bash
+  npm run dev:web
+  ```
+  The Web app will be available at `http://localhost:5173`.
+
+### Other Commands
+
+- **Build:**
+  ```bash
+  npm run build
+  ```
+- **Architecture Check:**
+  ```bash
+  npm run check-arch
+  ```
+- **Lint:**
+  ```bash
+  npm run lint
+  ```
+
+## 🛡 Architectural Enforcement
+
+We use `dependency-cruiser` to enforce the **Domain-Driven Feature** architecture. 
+- `domain` MUST NOT depend on `features`, `pages`, `layouts`, or `providers`.
+- `features` MUST NOT depend on other `features`.
+- `web` MUST NOT depend on `api` internals (like Prisma).
+- `components/ui` MUST be "leaf" components.
