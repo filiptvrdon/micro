@@ -29,4 +29,13 @@ We use `dependency-cruiser` to enforce the **Domain-Driven Feature** architectur
     - `providers` MUST NOT depend on `pages` or `layouts`.
 - All PRs/changes should pass `npm run check-arch`.
 
+## ✅ Build & Run Verification
+All changes to the API or Web should be verified by building and running the application.
+- **API Verification**:
+    - Run `npm run build:api` from the root.
+    - Start the server: `npm start -w @micro/api`.
+    - Verify with health check: `curl http://localhost:3000/health` should return `OK`.
+- **Web Verification**:
+    - Run `npm run build:web` from the root.
+
 after each finished task, ask for permission to commit

@@ -1,6 +1,6 @@
 import type { Post } from "../types/post"
 import type { PostRepository } from "./post-repository.interface"
-import { prisma } from "../../prisma/client"
+import { prisma } from "../../prisma/client.js"
 
 export class PgPostRepository implements PostRepository {
   async getFeed(): Promise<Post[]> {

@@ -2,8 +2,8 @@ import "dotenv/config"
 import { serve } from "@hono/node-server"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
-import { PgPostRepository } from "./src/domain/posts/repositories/pg-post.repository"
-import { PgUserRepository } from "./src/domain/users/repositories/pg-user.repository"
+import { PgPostRepository } from "./src/domain/posts/repositories/pg-post.repository.js"
+import { PgUserRepository } from "./src/domain/users/repositories/pg-user.repository.js"
 
 const app = new Hono()
 

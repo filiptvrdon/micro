@@ -1,6 +1,6 @@
 import type { User, UserProfile } from "../types/user"
 import type { UserRepository } from "./user-repository.interface"
-import { prisma } from "../../prisma/client"
+import { prisma } from "../../prisma/client.js"
 
 export class PgUserRepository implements UserRepository {
   async getCurrentUser(userId?: string): Promise<User | null> {

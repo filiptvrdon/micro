@@ -15,7 +15,8 @@
     "build": "npm run build:web && npm run build:api",
     "build:web": "npm run build -w @micro/web",
     "build:api": "npm run build -w @micro/api",
-    "start:api": "node apps/api/dist/index.js",
+    "start": "npm start -w @micro/api",
+    "start:api": "npm start -w @micro/api",
     "lint": "eslint .",
     "check-arch": "depcruise apps/web apps/api",
     "preview": "npm run preview -w @micro/web"
