@@ -3,19 +3,28 @@ import type { PostRepository } from "./post-repository.interface.ts"
 
 const API_URL = import.meta.env.VITE_API_URL || ""
 
-const getAuthHeaders = (): Record<string, string> => {
-  const token = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("hanko="))
-    ?.split("=")[1];
-
-  return token ? { "Authorization": `Bearer ${token}` } : {};
-};
-
 export class ApiPostRepository implements PostRepository {
+  private getAuthHeaders(): Record<string, string> {
+    // 1. Try to get from DevAuthRepository if in DEV
+    if (import.meta.env.DEV) {
+      const isDevLoggedIn = localStorage.getItem("dev_logged_in") === "true";
+      if (isDevLoggedIn) {
+        return { "Authorization": "Bearer dev-token-secret" };
+      }
+    }
+
+    // 2. Fallback to Hanko cookie
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("hanko="))
+      ?.split("=")[1];
+
+    return token ? { "Authorization": `Bearer ${token}` } : {};
+  }
+
   async getFeed(): Promise<Post[]> {
     const response = await fetch(`${API_URL}/api/posts`, {
-      headers: getAuthHeaders()
+      headers: this.getAuthHeaders()
     })
     if (!response.ok) throw new Error("Failed to fetch feed")
     return response.json()
@@ -23,7 +32,7 @@ export class ApiPostRepository implements PostRepository {
 
   async getPostsByUserId(userId: string): Promise<Post[]> {
     const response = await fetch(`${API_URL}/api/posts?userId=${userId}`, {
-      headers: getAuthHeaders()
+      headers: this.getAuthHeaders()
     })
     if (!response.ok) throw new Error("Failed to fetch user posts")
     return response.json()
@@ -31,7 +40,7 @@ export class ApiPostRepository implements PostRepository {
 
   async getPostById(id: string): Promise<Post | null> {
     const response = await fetch(`${API_URL}/api/posts/${id}`, {
-      headers: getAuthHeaders()
+      headers: this.getAuthHeaders()
     })
     if (response.status === 404) return null
     if (!response.ok) throw new Error("Failed to fetch post")
@@ -43,7 +52,7 @@ export class ApiPostRepository implements PostRepository {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...getAuthHeaders()
+        ...this.getAuthHeaders()
       },
       body: JSON.stringify(postData),
     })

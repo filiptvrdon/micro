@@ -3,41 +3,43 @@ import type { ReactNode } from "react";
 import type { AuthSession } from "@/domain/auth/types/session.ts";
 import type { AuthRepository } from "@/domain/auth/repositories/auth-repository.interface.ts";
 import { HankoAuthRepository } from "@/domain/auth/repositories/hanko-auth.repository.ts";
+import { DevAuthRepository } from "@/domain/auth/repositories/dev-auth.repository.ts";
 
 interface AuthContextType {
   session: AuthSession | null;
   isLoading: boolean;
   logout: () => Promise<void>;
   authRepository: AuthRepository;
+  loginAsDev?: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [authRepository] = useState(() => new HankoAuthRepository());
+  const [authRepository] = useState<AuthRepository>(() =>
+    import.meta.env.DEV ? new DevAuthRepository() : new HankoAuthRepository()
+  );
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const currentSession = authRepository.getSession();
-      if (currentSession) {
-        const isValid = await authRepository.verifySession(currentSession.jwt);
-        if (isValid) {
-          setSession(currentSession);
-        } else {
-          setSession(null);
-        }
+  const checkSession = async () => {
+    setIsLoading(true);
+    const currentSession = authRepository.getSession();
+    if (currentSession) {
+      const isValid = await authRepository.verifySession(currentSession.jwt);
+      if (isValid) {
+        setSession(currentSession);
       } else {
         setSession(null);
       }
-      setIsLoading(false);
-    };
+    } else {
+      setSession(null);
+    }
+    setIsLoading(false);
+  };
 
+  useEffect(() => {
     checkSession();
-
-    // Listen for cookie changes or Hanko events if possible
-    // For simplicity, we check on mount and provide a logout method
   }, [authRepository]);
 
   const logout = async () => {
@@ -45,8 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
   };
 
+  const loginAsDev = async () => {
+    if (authRepository instanceof DevAuthRepository) {
+      await authRepository.loginAsDev();
+      await checkSession();
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ session, isLoading, logout, authRepository }}>
+    <AuthContext.Provider value={{ session, isLoading, logout, authRepository, loginAsDev }}>
       {children}
     </AuthContext.Provider>
   );

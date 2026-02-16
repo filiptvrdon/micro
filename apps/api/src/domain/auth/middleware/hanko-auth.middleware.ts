@@ -10,6 +10,12 @@ export const hankoAuth = async (c: Context, next: Next) => {
     return c.json({ error: "Unauthorized" }, 401)
   }
 
+  // Bypass for local development
+  if (process.env.NODE_ENV !== "production" && token === "dev-token-secret") {
+    c.set("userId", "dev-user-123")
+    return await next()
+  }
+
   if (!HANKO_AUTH_URL) {
     console.error("HANKO_AUTH_URL is not defined")
     return c.json({ error: "Internal Server Error" }, 500)
