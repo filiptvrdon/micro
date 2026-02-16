@@ -26,7 +26,11 @@ The project follows a **Domain-Driven Feature** architecture and is split into t
 2. **Environment Variables:**
    Create a `.env` file in the root directory (you can copy `.env.example` if it exists, or follow the template below):
    ```env
-   DATABASE_URL="postgresql://user:password@localhost:5432/micro_db?schema=public"
+   DATABASE_HOST=localhost
+   DATABASE_USER=user
+   DATABASE_PASSWORD=password
+   DATABASE_NAME=micro_db
+   DATABASE_PORT=5432
    HANKO_AUTH_URL="https://your-hanko-url.hanko.io"
    VITE_API_URL="http://localhost:3000"
    ```
