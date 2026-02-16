@@ -2,7 +2,8 @@ import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { register, Hanko } from "@teamhanko/hanko-elements";
 
-const hankoApi = import.meta.env.VITE_HANKO_AUTH_URL || import.meta.env.HANKO_AUTH_URL;
+// Vite exposes only variables prefixed with VITE_. Ensure it's provided at build time.
+const hankoApi = (import.meta.env.VITE_HANKO_AUTH_URL as string) || "";
 
 export function HankoAuth() {
   const navigate = useNavigate();
@@ -12,6 +13,10 @@ export function HankoAuth() {
   }, [navigate]);
 
   useEffect(() => {
+    if (!hankoApi) {
+      console.error("VITE_HANKO_AUTH_URL is not defined. Set it in your deployment environment.");
+      return;
+    }
     const hanko = new Hanko(hankoApi);
     hanko.onSessionCreated(() => {
       redirectAfterLogin();
@@ -19,6 +24,7 @@ export function HankoAuth() {
   }, [redirectAfterLogin]);
 
   useEffect(() => {
+    if (!hankoApi) return;
     register(hankoApi).catch((error) => {
       console.error("Hanko register failed:", error);
     });
