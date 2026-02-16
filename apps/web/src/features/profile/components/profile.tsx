@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx"
 import { Button } from "@/components/ui/button.tsx"
 import { Separator } from "@/components/ui/separator.tsx"
@@ -35,8 +36,10 @@ export function Profile({ profile, posts }: ProfileProps) {
           <Button variant="outline" className="flex-1 rounded-full">
             Edit Profile
           </Button>
-          <Button variant="outline" size="icon" className="rounded-full">
-            <Settings className="h-4 w-4" />
+          <Button variant="outline" size="icon" className="rounded-full" asChild>
+            <Link to="/settings">
+              <Settings className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </div>

@@ -1,14 +1,14 @@
 import type { Post } from "../types/post.ts"
 import type { PostRepository } from "./post-repository.interface.ts"
 
-const API_URL = ""
+const API_URL = import.meta.env.VITE_API_URL || ""
 
 const getAuthHeaders = (): Record<string, string> => {
   const token = document.cookie
     .split("; ")
     .find((row) => row.startsWith("hanko="))
     ?.split("=")[1];
-  
+
   return token ? { "Authorization": `Bearer ${token}` } : {};
 };
 

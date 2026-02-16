@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Outlet, NavLink, Navigate } from "react-router-dom"
-import { Home, User, PlusSquare, MoreHorizontal, LogOut } from "lucide-react"
+import { Home, User, PlusSquare, MoreHorizontal, LogOut, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle.tsx"
 import { Button } from "@/components/ui/button.tsx"
 import { useUserRepository } from "@/providers/user-provider.tsx"
@@ -47,6 +47,12 @@ export function AppLayout() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <NavLink to="/settings" className="flex items-center w-full">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </NavLink>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => logout()}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>

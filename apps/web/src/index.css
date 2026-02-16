@@ -159,4 +159,132 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  hanko-auth,
+  hanko-profile {
+    --color: var(--foreground);
+    --color-shade-1: var(--muted-foreground);
+    --color-shade-2: var(--muted);
+
+    --brand-color: var(--primary);
+    --brand-color-shade-1: var(--primary);
+    --brand-contrast-color: var(--primary-foreground);
+
+    --background-color: transparent;
+    --error-color: var(--destructive);
+    --link-color: var(--primary);
+
+    --font-family: inherit;
+    --border-radius: var(--radius);
+    --border-width: 1px;
+    --border-style: solid;
+
+    --input-min-width: 100%;
+    --button-min-width: 100%;
+
+    --container-padding: 0;
+  }
+
+  hanko-auth::part(container),
+  hanko-profile::part(container) {
+    background-color: transparent;
+  }
+
+  hanko-auth::part(headline1),
+  hanko-profile::part(headline1) {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--foreground);
+  }
+
+  hanko-auth::part(headline2),
+  hanko-profile::part(headline2) {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--foreground);
+  }
+
+  hanko-auth::part(paragraph),
+  hanko-profile::part(paragraph) {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  hanko-auth::part(input),
+  hanko-profile::part(input) {
+    background-color: var(--input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--foreground);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    height: 2.5rem;
+  }
+
+  hanko-auth::part(button),
+  hanko-profile::part(button) {
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 0.875rem;
+    height: 2.5rem;
+    transition: opacity 0.2s;
+  }
+
+  hanko-auth::part(primary-button),
+  hanko-profile::part(primary-button) {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border: none;
+  }
+
+  hanko-auth::part(primary-button):hover,
+  hanko-profile::part(primary-button):hover {
+    opacity: 0.9;
+  }
+
+  hanko-auth::part(link),
+  hanko-profile::part(link) {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  hanko-auth::part(link):hover,
+  hanko-profile::part(link):hover {
+    text-decoration: underline;
+  }
+
+  hanko-auth::part(error),
+  hanko-profile::part(error) {
+    background-color: color-mix(in srgb, var(--destructive), transparent 90%);
+    border: 1px solid var(--destructive);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  hanko-auth::part(error-text),
+  hanko-profile::part(error-text) {
+    color: var(--destructive);
+    font-size: 0.875rem;
+  }
+
+  hanko-auth::part(divider-line) {
+    background-color: var(--border);
+  }
+
+  hanko-auth::part(divider-text) {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  hanko-auth::part(form-item) {
+    margin-bottom: 1rem;
+  }
 }
