@@ -1,23 +1,38 @@
 import type { Post } from "../types/post.ts"
 import type { PostRepository } from "./post-repository.interface.ts"
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000"
+const API_URL = ""
+
+const getAuthHeaders = (): Record<string, string> => {
+  const token = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("hanko="))
+    ?.split("=")[1];
+  
+  return token ? { "Authorization": `Bearer ${token}` } : {};
+};
 
 export class ApiPostRepository implements PostRepository {
   async getFeed(): Promise<Post[]> {
-    const response = await fetch(`${API_URL}/api/posts`)
+    const response = await fetch(`${API_URL}/api/posts`, {
+      headers: getAuthHeaders()
+    })
     if (!response.ok) throw new Error("Failed to fetch feed")
     return response.json()
   }
 
   async getPostsByUserId(userId: string): Promise<Post[]> {
-    const response = await fetch(`${API_URL}/api/posts?userId=${userId}`)
+    const response = await fetch(`${API_URL}/api/posts?userId=${userId}`, {
+      headers: getAuthHeaders()
+    })
     if (!response.ok) throw new Error("Failed to fetch user posts")
     return response.json()
   }
 
   async getPostById(id: string): Promise<Post | null> {
-    const response = await fetch(`${API_URL}/api/posts/${id}`)
+    const response = await fetch(`${API_URL}/api/posts/${id}`, {
+      headers: getAuthHeaders()
+    })
     if (response.status === 404) return null
     if (!response.ok) throw new Error("Failed to fetch post")
     return response.json()
@@ -28,6 +43,7 @@ export class ApiPostRepository implements PostRepository {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...getAuthHeaders()
       },
       body: JSON.stringify(postData),
     })

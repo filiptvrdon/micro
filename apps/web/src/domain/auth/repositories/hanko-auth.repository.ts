@@ -3,7 +3,7 @@ import { Hanko } from "@teamhanko/hanko-elements";
 import type { AuthRepository } from "./auth-repository.interface.ts";
 import type { AuthSession } from "../types/session.ts";
 
-const hankoApi = import.meta.env.VITE_HANKO_API_URL || import.meta.env.HANKO_AUTH_URL;
+const hankoApi = import.meta.env.VITE_HANKO_AUTH_URL || import.meta.env.HANKO_AUTH_URL;
 
 export class HankoAuthRepository implements AuthRepository {
   private hanko: Hanko;
