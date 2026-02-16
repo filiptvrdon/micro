@@ -6,10 +6,10 @@ module.exports = {
       severity: 'error',
       comment: 'The domain layer should be independent of the UI layer (features, pages, layouts).',
       from: {
-        path: '^src/(api/domain|web/domain)'
+        path: '^apps/(api|web)/src/domain'
       },
       to: {
-        path: '^src/web/(features|pages|layouts|providers)'
+        path: '^apps/web/src/(features|pages|layouts|providers)'
       }
     },
     {
@@ -17,11 +17,11 @@ module.exports = {
       severity: 'error',
       comment: 'Features should be self-contained to prevent tight coupling. If you need shared logic, move it to the domain or a shared component.',
       from: {
-        path: '^src/web/features/([^/]+)'
+        path: '^apps/web/src/features/([^/]+)'
       },
       to: {
-        path: '^src/web/features/([^/]+)',
-        pathNot: '^src/web/features/$1'
+        path: '^apps/web/src/features/([^/]+)',
+        pathNot: '^apps/web/src/features/$1'
       }
     },
     {
@@ -29,10 +29,10 @@ module.exports = {
       severity: 'error',
       comment: 'Shared UI components should not depend on domain logic or features. They should be pure presentational components.',
       from: {
-        path: '^src/web/components/ui'
+        path: '^apps/web/src/components/ui'
       },
       to: {
-        path: '^src/(api/domain|web/domain|web/features|web/pages|web/providers)'
+        path: '^apps/(api/src/domain|web/src/domain|web/src/features|web/src/pages|web/src/providers)'
       }
     },
     {
@@ -40,10 +40,10 @@ module.exports = {
       severity: 'error',
       comment: 'Providers should be low-level and not depend on pages or layouts.',
       from: {
-        path: '^src/web/providers'
+        path: '^apps/web/src/providers'
       },
       to: {
-        path: '^src/web/(pages|layouts)'
+        path: '^apps/web/src/(pages|layouts)'
       }
     },
     {
@@ -51,11 +51,11 @@ module.exports = {
       severity: 'error',
       comment: 'Web should only depend on shared types/interfaces from api/domain, not Prisma or repository implementations.',
       from: {
-        path: '^src/web'
+        path: '^apps/web'
       },
       to: {
-        path: '^src/api',
-        pathNot: '^src/api/domain/([^/]+)/(types|repositories/[^/]+\\.interface\\.ts$)'
+        path: '^apps/api',
+        pathNot: '^apps/api/src/domain/([^/]+)/(types|repositories/[^/]+\\.interface\\.ts$)'
       }
     },
     {
@@ -204,8 +204,8 @@ module.exports = {
         'section of your package.json. If this module is development only - add it to the ' +
         'from.pathNot re of the not-to-dev-dep rule in the dependency-cruiser configuration',
       from: {
-        path: '^(src)',
-        pathNot: '[.](?:spec|test)[.](?:js|mjs|cjs|jsx|ts|mts|cts|tsx)$'
+        path: '^(apps)',
+        pathNot: '([.](?:spec|test)[.](?:js|mjs|cjs|jsx|ts|mts|cts|tsx)$|vite\\.config\\.ts$)'
       },
       to: {
         dependencyTypes: [
@@ -253,9 +253,9 @@ module.exports = {
     }
   ],
   options: {
-    tsConfig: {
-      fileName: 'tsconfig.json'
-    },
+    // tsConfig: {
+    //   fileName: 'tsconfig.json'
+    // },
     // Which modules not to follow further when encountered
     doNotFollow: {
       // path: an array of regular expressions in strings to match against
@@ -263,10 +263,9 @@ module.exports = {
     },
 
     // Which modules to exclude
-    // exclude : {
-    //   // path: an array of regular expressions in strings to match against
-    //   path: '',
-    // },
+    exclude : {
+       path: ['apps/web/postcss.config.js', 'node_modules/jose']
+    },
 
     // Which modules to exclusively include (array of regular expressions in strings)
     // dependency-cruiser will skip everything that doesn't match this pattern
@@ -326,7 +325,7 @@ module.exports = {
     // dependency-cruiser's current working directory). When not provided
     // defaults to './tsconfig.json'.
     tsConfig: {
-      fileName: 'tsconfig.app.json'
+      fileName: 'tsconfig.json'
     },
 
     // Webpack configuration to use to get resolve options from.
@@ -413,7 +412,7 @@ module.exports = {
       },
       archi: {
         // Pattern of modules to consolidate to.
-        collapsePattern: '^(?:packages|src|lib(s?)|app(s?)|bin|test(s?)|spec(s?))/[^/]+|node_modules/(?:@[^/]+/[^/]+|[^/]+)',
+        collapsePattern: '^(?:packages|apps|lib(s?)|app(s?)|bin|test(s?)|spec(s?))/[^/]+|node_modules/(?:@[^/]+/[^/]+|[^/]+)',
 
         // Options to tweak the appearance of your graph. If you don't specify a
         // theme for 'archi' dependency-cruiser will use the one specified in the

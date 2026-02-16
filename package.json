@@ -3,16 +3,19 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
   "scripts": {
-    "dev:web": "vite",
-    "dev:api": "tsx watch src/api/index.ts",
+    "dev:web": "npm run dev -w @micro/web",
+    "dev:api": "npm run dev -w @micro/api",
     "build": "npm run build:web && npm run build:api",
-    "build:web": "vite build",
-    "build:api": "tsc -p tsconfig.api.json",
-    "start:api": "node dist/api/index.js",
+    "build:web": "npm run build -w @micro/web",
+    "build:api": "npm run build -w @micro/api",
+    "start:api": "node apps/api/dist/index.js",
     "lint": "eslint .",
-    "check-arch": "depcruise src/web src/api",
-    "preview": "vite preview"
+    "check-arch": "depcruise apps/web apps/api",
+    "preview": "npm run preview -w @micro/web"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
