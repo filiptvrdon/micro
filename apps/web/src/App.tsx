@@ -4,6 +4,7 @@ import { FeedPage } from "@/pages/feed.tsx"
 import { ProfilePage } from "@/pages/profile.tsx"
 import { SettingsPage } from "@/pages/settings.tsx"
 import { LoginPage } from "@/pages/login.tsx"
+import { UploadPage } from "@/pages/upload.tsx"
 import { AuthProvider } from "@/providers/auth-provider.tsx"
 
 function App() {
@@ -16,7 +17,7 @@ function App() {
             <Route path="/" element={<FeedPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/upload" element={<div className="py-20 text-center">Upload Coming Soon</div>} />
+            <Route path="/upload" element={<UploadPage />} />
             {/* Redirect any other route to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
