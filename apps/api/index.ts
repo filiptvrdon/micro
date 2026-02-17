@@ -8,6 +8,7 @@ import { join } from "node:path"
 import { hankoAuth } from "./src/domain/auth/middleware/hanko-auth.middleware.js"
 import { PgPostRepository } from "./src/domain/posts/repositories/pg-post.repository.js"
 import { PgUserRepository } from "./src/domain/users/repositories/pg-user.repository.js"
+import { S3StorageRepository } from "./src/domain/storage/repositories/s3-storage.repository.js"
 
 const app = new Hono<{
   Variables: {
@@ -19,6 +20,7 @@ app.use("/*", cors())
 
 const postRepository = new PgPostRepository()
 const userRepository = new PgUserRepository()
+const storageRepository = new S3StorageRepository()
 
 // --- API Routes ---
 
@@ -47,6 +49,30 @@ app.post("/api/posts", hankoAuth, async (c) => {
   const userId = c.get("userId")
   const body = await c.req.json()
   const post = await postRepository.createPost({ ...body, userId })
+  return c.json(post, 201)
+})
+
+// Upload image and create a post in a single request (multipart/form-data)
+app.post("/api/posts/image", hankoAuth, async (c) => {
+  const userId = c.get("userId")
+  const form = await c.req.parseBody()
+  const image: any = (form as any)["image"]
+  const caption = typeof (form as any)["caption"] === "string" ? (form as any)["caption"] : ""
+  const tag = typeof (form as any)["tag"] === "string" ? (form as any)["tag"] : "General"
+
+  if (!image || typeof image.arrayBuffer !== "function") {
+    return c.json({ error: "Image file is required (field 'image')" }, 400)
+  }
+
+  const fileName: string = typeof image.name === "string" ? image.name : `upload-${Date.now()}`
+  const contentType: string = typeof image.type === "string" && image.type ? image.type : "application/octet-stream"
+  const arrayBuffer = await image.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+
+  const key = `posts/${userId}/${Date.now()}-${fileName}`
+  const { url } = await storageRepository.uploadFile(key, buffer, contentType)
+
+  const post = await postRepository.createPost({ userId, imageUrl: url, caption, tag })
   return c.json(post, 201)
 })
 

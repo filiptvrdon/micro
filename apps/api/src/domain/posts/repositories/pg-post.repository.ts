@@ -1,5 +1,6 @@
 import type { Post } from "../types/post"
 import type { PostRepository } from "./post-repository.interface"
+import type { CreatePostInput } from "../types/create-post-input"
 import { prisma } from "../../prisma/client.js"
 
 export class PgPostRepository implements PostRepository {
@@ -76,7 +77,7 @@ export class PgPostRepository implements PostRepository {
     }
   }
 
-  async createPost(postData: Omit<Post, "id" | "createdAt" | "likesCount" | "commentsCount">): Promise<Post> {
+  async createPost(postData: CreatePostInput): Promise<Post> {
     const post = await prisma.post.create({
       data: {
         userId: postData.userId,
