@@ -4,6 +4,22 @@ import type { CreatePostInput } from "../types/create-post-input"
 import { prisma } from "../../prisma/client.js"
 
 export class PgPostRepository implements PostRepository {
+  private toProxiedUrl(value?: string | null): string | undefined {
+    if (!value) return undefined
+    let key = value
+    if (value.startsWith("http")) {
+      const endpoint = (process.env.S3_ENDPOINT || "").replace(/\/+$/, "")
+      const bucket = process.env.S3_BUCKET || ""
+      const prefix = endpoint && bucket ? `${endpoint}/${bucket}/` : ""
+      if (prefix && value.startsWith(prefix)) {
+        key = decodeURI(value.slice(prefix.length))
+      } else {
+        return value
+      }
+    }
+    return `/media/${encodeURI(key)}`
+  }
+
   async getFeed(): Promise<Post[]> {
     const posts = await prisma.post.findMany({
       include: {
@@ -19,7 +35,7 @@ export class PgPostRepository implements PostRepository {
       userId: post.userId,
       authorName: post.author.displayName,
       authorAvatarUrl: post.author.avatarUrl || undefined,
-      imageUrl: post.imageUrl,
+      imageUrl: this.toProxiedUrl(post.imageUrl) as string,
       caption: post.caption,
       tag: post.tag,
       createdAt: post.createdAt.toISOString(),
@@ -44,7 +60,7 @@ export class PgPostRepository implements PostRepository {
       userId: post.userId,
       authorName: post.author.displayName,
       authorAvatarUrl: post.author.avatarUrl || undefined,
-      imageUrl: post.imageUrl,
+      imageUrl: this.toProxiedUrl(post.imageUrl) as string,
       caption: post.caption,
       tag: post.tag,
       createdAt: post.createdAt.toISOString(),
@@ -68,7 +84,7 @@ export class PgPostRepository implements PostRepository {
       userId: post.userId,
       authorName: post.author.displayName,
       authorAvatarUrl: post.author.avatarUrl || undefined,
-      imageUrl: post.imageUrl,
+      imageUrl: this.toProxiedUrl(post.imageUrl) as string,
       caption: post.caption,
       tag: post.tag,
       createdAt: post.createdAt.toISOString(),
@@ -95,7 +111,7 @@ export class PgPostRepository implements PostRepository {
       userId: post.userId,
       authorName: post.author.displayName,
       authorAvatarUrl: post.author.avatarUrl || undefined,
-      imageUrl: post.imageUrl,
+      imageUrl: this.toProxiedUrl(post.imageUrl) as string,
       caption: post.caption,
       tag: post.tag,
       createdAt: post.createdAt.toISOString(),

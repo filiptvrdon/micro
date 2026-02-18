@@ -70,9 +70,9 @@ app.post("/api/posts/image", hankoAuth, async (c) => {
   const buffer = Buffer.from(arrayBuffer)
 
   const key = `posts/${userId}/${Date.now()}-${fileName}`
-  const { url } = await storageRepository.uploadFile(key, buffer, contentType)
+  const { key: storedKey } = await storageRepository.uploadFile(key, buffer, contentType)
 
-  const post = await postRepository.createPost({ userId, imageUrl: url, caption, tag })
+  const post = await postRepository.createPost({ userId, imageUrl: storedKey, caption, tag })
   return c.json(post, 201)
 })
 
@@ -107,8 +107,8 @@ app.post("/api/users/current/avatar", hankoAuth, async (c) => {
   const contentType: string = typeof image.type === "string" && image.type ? image.type : "application/octet-stream"
   const buffer = Buffer.from(await image.arrayBuffer())
   const key = `avatars/${userId}/${Date.now()}-${fileName}`
-  const { url } = await storageRepository.uploadFile(key, buffer, contentType)
-  const updated = await userRepository.updateUser(userId, { avatarUrl: url })
+  const { key: storedKey } = await storageRepository.uploadFile(key, buffer, contentType)
+  const updated = await userRepository.updateUser(userId, { avatarUrl: storedKey })
   return c.json(updated)
 })
 
@@ -130,6 +130,21 @@ app.get("/api/users/:id/following", async (c) => {
   const id = c.req.param("id")
   const following = await userRepository.getFollowing(id)
   return c.json(following)
+})
+
+// Media proxy: redirect to short-lived signed S3 URL
+app.get("/media/*", async (c) => {
+  const path = c.req.path
+  const prefix = "/media/"
+  const key = decodeURI(path.startsWith(prefix) ? path.slice(prefix.length) : path)
+  if (!key) return c.text("Missing key", 400)
+  try {
+    const signed = await storageRepository.getSignedUrl(key, 300)
+    return c.redirect(signed, 302)
+  } catch (e) {
+    console.error("Failed to sign media URL", e)
+    return c.text("Not found", 404)
+  }
 })
 
 // --- Static Assets & SPA Fallback ---

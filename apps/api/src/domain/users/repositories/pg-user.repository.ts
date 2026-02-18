@@ -3,6 +3,22 @@ import type { UserRepository } from "./user-repository.interface"
 import { prisma } from "../../prisma/client.js"
 
 export class PgUserRepository implements UserRepository {
+  private toProxiedUrl(value?: string | null): string | undefined {
+    if (!value) return undefined
+    let key = value
+    if (value.startsWith("http")) {
+      const endpoint = (process.env.S3_ENDPOINT || "").replace(/\/+$/, "")
+      const bucket = process.env.S3_BUCKET || ""
+      const prefix = endpoint && bucket ? `${endpoint}/${bucket}/` : ""
+      if (prefix && value.startsWith(prefix)) {
+        key = decodeURI(value.slice(prefix.length))
+      } else {
+        return value
+      }
+    }
+    return `/media/${encodeURI(key)}`
+  }
+
   async ensureUserExists(userId: string): Promise<void> {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -32,7 +48,7 @@ export class PgUserRepository implements UserRepository {
       id: user.id,
       username: user.username,
       displayName: user.displayName,
-      avatarUrl: user.avatarUrl || undefined,
+      avatarUrl: this.toProxiedUrl(user.avatarUrl) || undefined,
       bio: user.bio || undefined,
     }
   }
@@ -48,7 +64,7 @@ export class PgUserRepository implements UserRepository {
       id: user.id,
       username: user.username,
       displayName: user.displayName,
-      avatarUrl: user.avatarUrl || undefined,
+      avatarUrl: this.toProxiedUrl(user.avatarUrl) || undefined,
       bio: user.bio || undefined,
     }
   }
@@ -73,7 +89,7 @@ export class PgUserRepository implements UserRepository {
       id: user.id,
       username: user.username,
       displayName: user.displayName,
-      avatarUrl: user.avatarUrl || undefined,
+      avatarUrl: this.toProxiedUrl(user.avatarUrl) || undefined,
       bio: user.bio || undefined,
       postCount: user._count.posts,
       followerCount: user._count.followedBy,
@@ -95,7 +111,7 @@ export class PgUserRepository implements UserRepository {
       id: u.id,
       username: u.username,
       displayName: u.displayName,
-      avatarUrl: u.avatarUrl || undefined,
+      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
       bio: u.bio || undefined,
     }))
   }
@@ -115,7 +131,7 @@ export class PgUserRepository implements UserRepository {
       id: updated.id,
       username: updated.username,
       displayName: updated.displayName,
-      avatarUrl: updated.avatarUrl || undefined,
+      avatarUrl: this.toProxiedUrl(updated.avatarUrl) || undefined,
       bio: updated.bio || undefined,
     }
   }
