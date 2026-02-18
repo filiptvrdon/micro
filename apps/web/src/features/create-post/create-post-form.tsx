@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label.tsx"
 import { Textarea } from "@/components/ui/textarea.tsx"
 import { usePostRepository } from "@/providers/post-provider.tsx"
 import type { Post } from "@/domain/posts/types/post.ts"
+import { compressImage } from "@/lib/image-compression.ts"
+import { toast } from "@/hooks/use-toast.ts"
 
 interface CreatePostFormProps {
   onCreated?: (post: Post) => void
@@ -27,19 +29,44 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
       setError("Please select an image to upload.")
       return
     }
-    try {
-      setSubmitting(true)
-      const created = await postRepository.createPostWithImage(file, caption, tag)
-      setCaption("")
-      setTag("")
-      setFile(null)
-      if (onCreated) onCreated(created)
-    } catch (err) {
-      console.error(err)
-      setError("Failed to create post. Please try again.")
-    } finally {
-      setSubmitting(false)
-    }
+
+    const currentFile = file
+    const currentCaption = caption
+    const currentTag = tag || "General"
+
+    // Reset form immediately
+    setCaption("")
+    setTag("")
+    setFile(null)
+    setSubmitting(false)
+
+    // Notify user that upload started
+    toast({
+      title: "Uploading post...",
+      description: "Your post is being compressed and uploaded in the background.",
+    })
+
+    // Perform compression and upload in background
+    ;(async () => {
+      try {
+        const compressedFile = await compressImage(currentFile, { maxSizeMB: 0.2 })
+        const created = await postRepository.createPostWithImage(compressedFile, currentCaption, currentTag)
+        
+        toast({
+          title: "Post ready!",
+          description: "Your post has been successfully uploaded and is now visible.",
+        })
+        
+        if (onCreated) onCreated(created)
+      } catch (err) {
+        console.error(err)
+        toast({
+          title: "Upload failed",
+          description: "There was an error uploading your post. Please try again.",
+          variant: "destructive",
+        })
+      }
+    })()
   }
 
   return (

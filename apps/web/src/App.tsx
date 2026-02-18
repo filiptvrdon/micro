@@ -6,6 +6,7 @@ import { SettingsPage } from "@/pages/settings.tsx"
 import { LoginPage } from "@/pages/login.tsx"
 import { UploadPage } from "@/pages/upload.tsx"
 import { AuthProvider } from "@/providers/auth-provider.tsx"
+import { Toaster } from "@/components/ui/toaster.tsx"
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </AuthProvider>
   )
 }

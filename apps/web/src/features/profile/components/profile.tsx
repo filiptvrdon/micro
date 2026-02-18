@@ -11,6 +11,7 @@ import { Grid, List, Settings } from "lucide-react"
 import type { UserProfile, User } from "@/domain/users/types/user.ts"
 import type { Post } from "@/domain/posts/types/post.ts"
 import { useUserRepository } from "@/providers/user-provider.tsx"
+import { compressImage } from "@/lib/image-compression.ts"
 
 interface ProfileProps {
   profile: UserProfile
@@ -35,7 +36,8 @@ export function Profile({ profile, posts, onProfileUpdated }: ProfileProps) {
 
       // If avatar selected, upload it first to get new URL reflected back
       if (avatarFile) {
-        updatedUser = await userRepository.uploadCurrentUserAvatar(avatarFile)
+        const compressedAvatar = await compressImage(avatarFile, { maxSizeMB: 0.1, maxWidthOrHeight: 400 })
+        updatedUser = await userRepository.uploadCurrentUserAvatar(compressedAvatar)
         onProfileUpdated?.(updatedUser)
       }
 
