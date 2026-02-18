@@ -1,11 +1,7 @@
-import { useEffect, useState } from "react"
 import { Outlet, NavLink, Navigate } from "react-router-dom"
 import { Home, User, PlusSquare, MoreHorizontal, LogOut, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle.tsx"
 import { Button } from "@/components/ui/button.tsx"
-import { useUserRepository } from "@/providers/user-provider.tsx"
-import type { User as UserType } from "@/domain/users/types/user.ts"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx"
 import { useAuth } from "@/providers/auth-provider.tsx"
 import {
   DropdownMenu,
@@ -16,14 +12,6 @@ import {
 
 export function AppLayout() {
   const { session, isLoading, logout } = useAuth()
-  const userRepository = useUserRepository()
-  const [currentUser, setCurrentUser] = useState<UserType | null>(null)
-
-  useEffect(() => {
-    if (session) {
-      userRepository.getCurrentUser(session.userId).then(setCurrentUser)
-    }
-  }, [userRepository, session])
 
   if (isLoading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>
@@ -80,14 +68,7 @@ export function AppLayout() {
         </NavLink>
 
         <NavLink to="/profile" className={({ isActive }) => `p-2 rounded-lg transition-colors ${isActive ? 'text-primary bg-secondary' : 'text-muted-foreground hover:text-foreground'}`}>
-          {currentUser?.avatarUrl ? (
-            <Avatar className="h-7 w-7 border-2 border-transparent aria-[current=page]:border-primary transition-all">
-              <AvatarImage src={currentUser.avatarUrl} />
-              <AvatarFallback>{currentUser.displayName[0]}</AvatarFallback>
-            </Avatar>
-          ) : (
-            <User className="h-6 w-6" />
-          )}
+	        <User className="h-6 w-6" />
           <span className="sr-only">Profile</span>
         </NavLink>
       </nav>

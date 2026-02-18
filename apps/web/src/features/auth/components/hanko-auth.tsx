@@ -2,6 +2,7 @@ import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { register, Hanko } from "@teamhanko/hanko-elements";
 import { useTheme } from "@/components/theme-provider.tsx";
+import { useAuth } from "@/providers/auth-provider.tsx";
 
 // Vite exposes only variables prefixed with VITE_. Ensure it's provided at build time.
 const hankoApi = (import.meta.env.VITE_HANKO_AUTH_URL as string) || "";
@@ -9,10 +10,12 @@ const hankoApi = (import.meta.env.VITE_HANKO_AUTH_URL as string) || "";
 export function HankoAuth() {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { refreshSession } = useAuth();
 
-  const redirectAfterLogin = useCallback(() => {
+  const redirectAfterLogin = useCallback(async () => {
+    await refreshSession();
     navigate("/");
-  }, [navigate]);
+  }, [navigate, refreshSession]);
 
   useEffect(() => {
     if (!hankoApi) {
