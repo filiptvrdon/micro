@@ -5,4 +5,6 @@ export interface UserRepository {
   getUserById(id: string): Promise<User | null>
   getUserProfile(username: string): Promise<UserProfile | null>
   getFollowing(userId: string): Promise<User[]>
+  updateCurrentUser(data: { username?: string; displayName?: string; bio?: string }): Promise<User>
+  uploadCurrentUserAvatar(file: File): Promise<User>
 }

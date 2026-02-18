@@ -56,4 +56,26 @@ export class ApiUserRepository implements UserRepository {
     if (!response.ok) throw new Error("Failed to fetch following")
     return response.json()
   }
+
+  async updateCurrentUser(data: { username?: string; displayName?: string; bio?: string }): Promise<User> {
+    const response = await fetch(`${API_URL}/api/users/current`, {
+      method: "PUT",
+      headers: { ...this.getAuthHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    if (!response.ok) throw new Error("Failed to update user")
+    return response.json()
+  }
+
+  async uploadCurrentUserAvatar(file: File): Promise<User> {
+    const form = new FormData()
+    form.append("avatar", file)
+    const response = await fetch(`${API_URL}/api/users/current/avatar`, {
+      method: "POST",
+      headers: this.getAuthHeaders(),
+      body: form
+    })
+    if (!response.ok) throw new Error("Failed to upload avatar")
+    return response.json()
+  }
 }

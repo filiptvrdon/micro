@@ -84,6 +84,34 @@ app.get("/api/users/current", hankoAuth, async (c) => {
   return c.json(user)
 })
 
+app.put("/api/users/current", hankoAuth, async (c) => {
+  const userId = c.get("userId")
+  const body = await c.req.json()
+  const data: { username?: string; displayName?: string; bio?: string } = {
+    username: typeof body.username === "string" ? body.username : undefined,
+    displayName: typeof body.displayName === "string" ? body.displayName : undefined,
+    bio: typeof body.bio === "string" ? body.bio : undefined,
+  }
+  const updated = await userRepository.updateUser(userId, data)
+  return c.json(updated)
+})
+
+app.post("/api/users/current/avatar", hankoAuth, async (c) => {
+  const userId = c.get("userId")
+  const form = await c.req.parseBody()
+  const image: any = (form as any)["avatar"] || (form as any)["image"]
+  if (!image || typeof image.arrayBuffer !== "function") {
+    return c.json({ error: "Avatar file is required (field 'avatar')" }, 400)
+  }
+  const fileName: string = typeof image.name === "string" ? image.name : `avatar-${Date.now()}`
+  const contentType: string = typeof image.type === "string" && image.type ? image.type : "application/octet-stream"
+  const buffer = Buffer.from(await image.arrayBuffer())
+  const key = `avatars/${userId}/${Date.now()}-${fileName}`
+  const { url } = await storageRepository.uploadFile(key, buffer, contentType)
+  const updated = await userRepository.updateUser(userId, { avatarUrl: url })
+  return c.json(updated)
+})
+
 app.get("/api/users/:id", async (c) => {
   const id = c.req.param("id")
   const user = await userRepository.getUserById(id)

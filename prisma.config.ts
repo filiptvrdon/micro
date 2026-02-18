@@ -3,14 +3,13 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-const databaseUrl = process.env["DATABASE_URL"] || `postgresql://${process.env["DATABASE_USER"]}:${process.env["DATABASE_PASSWORD"]}@${process.env["DATABASE_HOST"]}:${process.env["DATABASE_PORT"] || '5432'}/${process.env["DATABASE_NAME"]}?schema=public`;
-
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: databaseUrl,
+    url: process.env.DATABASE_URL,
+    directUrl: process.env.DIRECT_URL,
   },
 });

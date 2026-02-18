@@ -3,18 +3,13 @@ import type { UserRepository } from "./user-repository.interface"
 import { prisma } from "../../prisma/client.js"
 
 export class PgUserRepository implements UserRepository {
-  async getCurrentUser(userId?: string): Promise<User | null> {
-    if (!userId) return null;
-
-    let user = await prisma.user.findUnique({
+  async ensureUserExists(userId: string): Promise<void> {
+    const user = await prisma.user.findUnique({
       where: { id: userId },
     })
 
     if (!user) {
-      // For new users from Hanko, we create a profile
-      // In a real app, we might want to ask for a username/display name
-      // For now, we use a placeholder based on the ID
-      user = await prisma.user.create({
+      await prisma.user.create({
         data: {
           id: userId,
           username: `user_${userId.slice(0, 8)}`,
@@ -22,6 +17,16 @@ export class PgUserRepository implements UserRepository {
         },
       })
     }
+  }
+
+  async getCurrentUser(userId?: string): Promise<User | null> {
+    if (!userId) return null;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    })
+
+    if (!user) return null
 
     return {
       id: user.id,
@@ -93,5 +98,25 @@ export class PgUserRepository implements UserRepository {
       avatarUrl: u.avatarUrl || undefined,
       bio: u.bio || undefined,
     }))
+  }
+
+  async updateUser(userId: string, data: { username?: string; displayName?: string; bio?: string; avatarUrl?: string }): Promise<User> {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        username: data.username ?? undefined,
+        displayName: data.displayName ?? undefined,
+        bio: data.bio ?? undefined,
+        avatarUrl: data.avatarUrl ?? undefined,
+      },
+    })
+
+    return {
+      id: updated.id,
+      username: updated.username,
+      displayName: updated.displayName,
+      avatarUrl: updated.avatarUrl || undefined,
+      bio: updated.bio || undefined,
+    }
   }
 }
