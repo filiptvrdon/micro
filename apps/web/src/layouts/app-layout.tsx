@@ -57,7 +57,7 @@ export function AppLayout() {
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 w-full max-w-md bg-background/80 backdrop-blur-md border-t border-border px-6 py-3 flex justify-between items-center z-50">
-        <NavLink to="/" className={({ isActive }) => `p-2 rounded-lg transition-colors ${isActive ? 'text-primary bg-secondary' : 'text-muted-foreground hover:text-foreground'}`}>
+        <NavLink to="/feed" className={({ isActive }) => `p-2 rounded-lg transition-colors ${isActive ? 'text-primary bg-secondary' : 'text-muted-foreground hover:text-foreground'}`}>
           <Home className="h-6 w-6" />
           <span className="sr-only">Home</span>
         </NavLink>

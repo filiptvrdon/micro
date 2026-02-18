@@ -14,7 +14,7 @@ export function HankoAuth() {
 
   const redirectAfterLogin = useCallback(async () => {
     await refreshSession();
-    navigate("/");
+    navigate("/feed");
   }, [navigate, refreshSession]);
 
   useEffect(() => {

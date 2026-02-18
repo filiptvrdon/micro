@@ -15,12 +15,13 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route element={<AppLayout />}>
-            <Route path="/" element={<FeedPage />} />
+            <Route path="/" element={<Navigate to="/feed" replace />} />
+            <Route path="/feed" element={<FeedPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/upload" element={<UploadPage />} />
-            {/* Redirect any other route to home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Redirect any other unknown route to feed */}
+            <Route path="*" element={<Navigate to="/feed" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>
