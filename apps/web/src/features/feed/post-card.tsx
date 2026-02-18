@@ -4,7 +4,9 @@ import { Badge } from "@/components/ui/badge.tsx"
 import { Button } from "@/components/ui/button.tsx"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card.tsx"
 import { Heart, MessageCircle, Share2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
+import { useUserRepository } from "@/providers/user-provider.tsx"
 
 interface PostCardProps {
   post: Post
@@ -12,6 +14,15 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   const [liked, setLiked] = useState(false)
+  const userRepository = useUserRepository()
+  const [isFollowingAuthor, setIsFollowingAuthor] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    userRepository
+      .isFollowing(post.userId)
+      .then((v) => setIsFollowingAuthor(!!v))
+      .catch(() => setIsFollowingAuthor(false))
+  }, [post.userId, userRepository])
 
   // Simple relative time formatter for stub
   const displayTime = post.createdAt.includes('T')
@@ -21,17 +32,41 @@ export function PostCard({ post }: PostCardProps) {
   return (
     <Card className="border-none shadow-none overflow-hidden bg-transparent">
       <CardHeader className="flex flex-row items-center space-x-4 p-0 pb-4">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={post.authorAvatarUrl} />
-          <AvatarFallback>{post.authorName[0]}</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium">{post.authorName}</span>
-          <span className="text-xs text-muted-foreground">{displayTime}</span>
+        <Link to={`/profile/${post.authorUsername}`} className="flex items-center space-x-4">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={post.authorAvatarUrl} />
+            <AvatarFallback>{post.authorName[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">{post.authorName}</span>
+            <span className="text-xs text-muted-foreground">{displayTime}</span>
+          </div>
+        </Link>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant={isFollowingAuthor ? "secondary" : "outline"}
+            size="sm"
+            className="h-7 rounded-full px-3"
+            onClick={async () => {
+              try {
+                if (isFollowingAuthor) {
+                  await userRepository.unfollowUser(post.userId)
+                  setIsFollowingAuthor(false)
+                } else {
+                  await userRepository.followUser(post.userId)
+                  setIsFollowingAuthor(true)
+                }
+              } catch (e) {
+                console.error("Failed to toggle follow", e)
+              }
+            }}
+          >
+            {isFollowingAuthor ? "Following" : "Follow"}
+          </Button>
+          <Badge variant="secondary" className="font-normal">
+            {post.tag}
+          </Badge>
         </div>
-        <Badge variant="secondary" className="ml-auto font-normal">
-          {post.tag}
-        </Badge>
       </CardHeader>
 
       <CardContent className="p-0">

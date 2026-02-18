@@ -132,6 +132,54 @@ app.get("/api/users/:id/following", async (c) => {
   return c.json(following)
 })
 
+app.get("/api/users/:id/followers", async (c) => {
+  const id = c.req.param("id")
+  const followers = await userRepository.getFollowers(id)
+  return c.json(followers)
+})
+
+app.get("/api/users/search", async (c) => {
+  const query = c.req.query("q")
+  if (!query) return c.json([])
+  const users = await userRepository.searchUsers(query)
+  return c.json(users)
+})
+
+app.get("/api/users/new", async (c) => {
+  const limit = parseInt(c.req.query("limit") || "10")
+  const users = await userRepository.getNewUsers(limit)
+  return c.json(users)
+})
+
+app.get("/api/users/by-tag", async (c) => {
+  const tag = c.req.query("tag")
+  if (!tag) return c.json([])
+  const users = await userRepository.getUsersByTag(tag)
+  return c.json(users)
+})
+
+app.post("/api/users/:id/follow", hankoAuth, async (c) => {
+  const followerId = c.get("userId")
+  const followingId = c.req.param("id")
+  if (followerId === followingId) return c.json({ error: "Cannot follow yourself" }, 400)
+  await userRepository.followUser(followerId, followingId)
+  return c.json({ success: true })
+})
+
+app.post("/api/users/:id/unfollow", hankoAuth, async (c) => {
+  const followerId = c.get("userId")
+  const followingId = c.req.param("id")
+  await userRepository.unfollowUser(followerId, followingId)
+  return c.json({ success: true })
+})
+
+app.get("/api/users/:id/is-following", hankoAuth, async (c) => {
+  const followerId = c.get("userId")
+  const followingId = c.req.param("id")
+  const following = await userRepository.isFollowing(followerId, followingId)
+  return c.json({ isFollowing: following })
+})
+
 // Media proxy: redirect to short-lived signed S3 URL
 app.get("/media/*", async (c) => {
   const path = c.req.path

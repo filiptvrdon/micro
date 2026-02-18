@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils.ts"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx"
@@ -17,9 +17,10 @@ interface ProfileProps {
   profile: UserProfile
   posts: Post[]
   onProfileUpdated?: (updated: Partial<User>) => void
+  isOwnProfile?: boolean
 }
 
-export function Profile({ profile, posts, onProfileUpdated }: ProfileProps) {
+export function Profile({ profile, posts, onProfileUpdated, isOwnProfile = false }: ProfileProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isEditing, setIsEditing] = useState(false)
   const [username, setUsername] = useState(profile.username)
@@ -28,6 +29,19 @@ export function Profile({ profile, posts, onProfileUpdated }: ProfileProps) {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const userRepository = useUserRepository()
+  const [isFollowing, setIsFollowing] = useState<boolean | null>(null)
+  const [listMode, setListMode] = useState<"none" | "followers" | "following">("none")
+  const [followers, setFollowers] = useState<User[]>([])
+  const [followingList, setFollowingList] = useState<User[]>([])
+
+  useEffect(() => {
+    if (!isOwnProfile) {
+      userRepository
+        .isFollowing(profile.id)
+        .then((v) => setIsFollowing(!!v))
+        .catch(() => setIsFollowing(false))
+    }
+  }, [isOwnProfile, profile.id, userRepository])
 
   const handleSave = async () => {
     try {
@@ -83,14 +97,38 @@ export function Profile({ profile, posts, onProfileUpdated }: ProfileProps) {
         )}
 
         <div className="flex space-x-2 w-full pt-2">
-          <Button variant="outline" className="flex-1 rounded-full" onClick={() => setIsEditing((v) => !v)}>
-            {isEditing ? "Close" : "Edit Profile"}
-          </Button>
-          <Button variant="outline" size="icon" className="rounded-full" asChild>
-            <Link to="/settings">
-              <Settings className="h-4 w-4" />
-            </Link>
-          </Button>
+          {isOwnProfile ? (
+            <>
+              <Button variant="outline" className="flex-1 rounded-full" onClick={() => setIsEditing((v) => !v)}>
+                {isEditing ? "Close" : "Edit Profile"}
+              </Button>
+              <Button variant="outline" size="icon" className="rounded-full" asChild>
+                <Link to="/settings">
+                  <Settings className="h-4 w-4" />
+                </Link>
+              </Button>
+            </>
+          ) : (
+            <Button
+              className="flex-1 rounded-full"
+              variant={isFollowing ? "secondary" : "default"}
+              onClick={async () => {
+                try {
+                  if (isFollowing) {
+                    await userRepository.unfollowUser(profile.id)
+                    setIsFollowing(false)
+                  } else {
+                    await userRepository.followUser(profile.id)
+                    setIsFollowing(true)
+                  }
+                } catch (e) {
+                  console.error("Failed to toggle follow", e)
+                }
+              }}
+            >
+              {isFollowing ? "Following" : "Follow"}
+            </Button>
+          )}
         </div>
 
         {isEditing && (
@@ -134,15 +172,65 @@ export function Profile({ profile, posts, onProfileUpdated }: ProfileProps) {
           <div className="font-bold">{profile.postCount}</div>
           <div className="text-xs text-muted-foreground uppercase tracking-wider">Posts</div>
         </div>
-        <div className="text-center">
+        <button
+          className="text-center"
+          onClick={async () => {
+            try {
+              const list = await userRepository.getFollowers(profile.id)
+              setFollowers(list)
+              setListMode("followers")
+            } catch (e) {
+              console.error("Failed to fetch followers", e)
+            }
+          }}
+        >
           <div className="font-bold">{profile.followerCount}</div>
           <div className="text-xs text-muted-foreground uppercase tracking-wider">Followers</div>
-        </div>
-        <div className="text-center">
+        </button>
+        <button
+          className="text-center"
+          onClick={async () => {
+            try {
+              const list = await userRepository.getFollowing(profile.id)
+              setFollowingList(list)
+              setListMode("following")
+            } catch (e) {
+              console.error("Failed to fetch following", e)
+            }
+          }}
+        >
           <div className="font-bold">{profile.followingCount}</div>
           <div className="text-xs text-muted-foreground uppercase tracking-wider">Following</div>
-        </div>
+        </button>
       </div>
+
+      {listMode !== "none" && (
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              {listMode === "followers" ? "Followers" : "Following"}
+            </h3>
+            <Button variant="ghost" size="sm" onClick={() => setListMode("none")}>Close</Button>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {(listMode === "followers" ? followers : followingList).map((u) => (
+              <Link key={u.id} to={`/profile/${u.username}`} className="flex items-center gap-3 p-2 rounded hover:bg-muted/50">
+                <Avatar className="h-7 w-7">
+                  <AvatarImage src={u.avatarUrl} />
+                  <AvatarFallback>{u.displayName[0]}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium truncate">{u.displayName}</div>
+                  <div className="text-xs text-muted-foreground truncate">@{u.username}</div>
+                </div>
+              </Link>
+            ))}
+            {(listMode === "followers" ? followers : followingList).length === 0 && (
+              <div className="text-center text-sm text-muted-foreground py-4">No users to show.</div>
+            )}
+          </div>
+        </div>
+      )}
 
       <Separator className="opacity-50" />
 

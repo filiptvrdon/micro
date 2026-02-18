@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AppLayout } from "@/layouts/app-layout.tsx"
 import { HomePage } from "@/pages/home.tsx"
 import { FeedPage } from "@/pages/feed.tsx"
+import { ExplorePage } from "@/pages/explore.tsx"
 import { ProfilePage } from "@/pages/profile.tsx"
 import { SettingsPage } from "@/pages/settings.tsx"
 import { LoginPage } from "@/pages/login.tsx"
@@ -18,7 +19,9 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<AppLayout />}>
             <Route path="/feed" element={<FeedPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/:username" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/upload" element={<UploadPage />} />
             {/* Redirect any other unknown route to feed */}

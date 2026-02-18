@@ -57,6 +57,14 @@ export class ApiUserRepository implements UserRepository {
     return response.json()
   }
 
+  async getFollowers(userId: string): Promise<User[]> {
+    const response = await fetch(`${API_URL}/api/users/${userId}/followers`, {
+      headers: this.getAuthHeaders()
+    })
+    if (!response.ok) throw new Error("Failed to fetch followers")
+    return response.json()
+  }
+
   async updateCurrentUser(data: { username?: string; displayName?: string; bio?: string }): Promise<User> {
     const response = await fetch(`${API_URL}/api/users/current`, {
       method: "PUT",
@@ -77,5 +85,54 @@ export class ApiUserRepository implements UserRepository {
     })
     if (!response.ok) throw new Error("Failed to upload avatar")
     return response.json()
+  }
+
+  async searchUsers(query: string): Promise<User[]> {
+    const response = await fetch(`${API_URL}/api/users/search?q=${encodeURIComponent(query)}`, {
+      headers: this.getAuthHeaders()
+    })
+    if (!response.ok) throw new Error("Failed to search users")
+    return response.json()
+  }
+
+  async getNewUsers(limit: number): Promise<User[]> {
+    const response = await fetch(`${API_URL}/api/users/new?limit=${limit}`, {
+      headers: this.getAuthHeaders()
+    })
+    if (!response.ok) throw new Error("Failed to fetch new users")
+    return response.json()
+  }
+
+  async getUsersByTag(tag: string): Promise<User[]> {
+    const response = await fetch(`${API_URL}/api/users/by-tag?tag=${encodeURIComponent(tag)}`, {
+      headers: this.getAuthHeaders()
+    })
+    if (!response.ok) throw new Error("Failed to fetch users by tag")
+    return response.json()
+  }
+
+  async followUser(userId: string): Promise<void> {
+    const response = await fetch(`${API_URL}/api/users/${userId}/follow`, {
+      method: "POST",
+      headers: this.getAuthHeaders()
+    })
+    if (!response.ok) throw new Error("Failed to follow user")
+  }
+
+  async unfollowUser(userId: string): Promise<void> {
+    const response = await fetch(`${API_URL}/api/users/${userId}/unfollow`, {
+      method: "POST",
+      headers: this.getAuthHeaders()
+    })
+    if (!response.ok) throw new Error("Failed to unfollow user")
+  }
+
+  async isFollowing(userId: string): Promise<boolean> {
+    const response = await fetch(`${API_URL}/api/users/${userId}/is-following`, {
+      headers: this.getAuthHeaders()
+    })
+    if (!response.ok) throw new Error("Failed to check if following")
+    const data = await response.json()
+    return data.isFollowing
   }
 }

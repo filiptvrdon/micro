@@ -116,6 +116,25 @@ export class PgUserRepository implements UserRepository {
     }))
   }
 
+  async getFollowers(userId: string): Promise<User[]> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        followedBy: true,
+      },
+    })
+
+    if (!user) return []
+
+    return user.followedBy.map((u: any) => ({
+      id: u.id,
+      username: u.username,
+      displayName: u.displayName,
+      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
+      bio: u.bio || undefined,
+    }))
+  }
+
   async updateUser(userId: string, data: { username?: string; displayName?: string; bio?: string; avatarUrl?: string }): Promise<User> {
     const updated = await prisma.user.update({
       where: { id: userId },
@@ -134,5 +153,93 @@ export class PgUserRepository implements UserRepository {
       avatarUrl: this.toProxiedUrl(updated.avatarUrl) || undefined,
       bio: updated.bio || undefined,
     }
+  }
+
+  async searchUsers(query: string): Promise<User[]> {
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { username: { contains: query, mode: "insensitive" } },
+          { displayName: { contains: query, mode: "insensitive" } },
+        ],
+      },
+      take: 20,
+    })
+
+    return users.map((u: any) => ({
+      id: u.id,
+      username: u.username,
+      displayName: u.displayName,
+      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
+      bio: u.bio || undefined,
+    }))
+  }
+
+  async getNewUsers(limit: number): Promise<User[]> {
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    })
+
+    return users.map((u: any) => ({
+      id: u.id,
+      username: u.username,
+      displayName: u.displayName,
+      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
+      bio: u.bio || undefined,
+    }))
+  }
+
+  async followUser(followerId: string, followingId: string): Promise<void> {
+    await prisma.user.update({
+      where: { id: followerId },
+      data: {
+        following: {
+          connect: { id: followingId },
+        },
+      },
+    })
+  }
+
+  async unfollowUser(followerId: string, followingId: string): Promise<void> {
+    await prisma.user.update({
+      where: { id: followerId },
+      data: {
+        following: {
+          disconnect: { id: followingId },
+        },
+      },
+    })
+  }
+
+  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+    const count = await prisma.user.count({
+      where: {
+        id: followerId,
+        following: {
+          some: { id: followingId },
+        },
+      },
+    })
+    return count > 0
+  }
+
+  async getUsersByTag(tag: string): Promise<User[]> {
+    const posts = await prisma.post.findMany({
+      where: { tag: { contains: tag, mode: "insensitive" } },
+      distinct: ["userId"],
+      include: { author: true },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+    })
+
+    const users = posts.map((p: any) => p.author)
+    return users.map((u: any) => ({
+      id: u.id,
+      username: u.username,
+      displayName: u.displayName,
+      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
+      bio: u.bio || undefined,
+    }))
   }
 }

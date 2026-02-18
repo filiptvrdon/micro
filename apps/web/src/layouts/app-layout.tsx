@@ -1,5 +1,5 @@
 import { Outlet, NavLink, Navigate } from "react-router-dom"
-import { Home, User, PlusSquare, MoreHorizontal, LogOut, Settings } from "lucide-react"
+import { Home, Search, User, PlusSquare, MoreHorizontal, LogOut, Settings } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle.tsx"
 import { Button } from "@/components/ui/button.tsx"
 import { useAuth } from "@/providers/auth-provider.tsx"
@@ -60,6 +60,11 @@ export function AppLayout() {
         <NavLink to="/feed" className={({ isActive }) => `p-2 rounded-lg transition-colors ${isActive ? 'text-primary bg-secondary' : 'text-muted-foreground hover:text-foreground'}`}>
           <Home className="h-6 w-6" />
           <span className="sr-only">Home</span>
+        </NavLink>
+
+        <NavLink to="/explore" className={({ isActive }) => `p-2 rounded-lg transition-colors ${isActive ? 'text-primary bg-secondary' : 'text-muted-foreground hover:text-foreground'}`}>
+          <Search className="h-6 w-6" />
+          <span className="sr-only">Explore</span>
         </NavLink>
 
         <NavLink to="/upload" className={({ isActive }) => `p-2 rounded-lg transition-colors ${isActive ? 'text-primary bg-secondary' : 'text-muted-foreground hover:text-foreground'}`}>
