@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AppLayout } from "@/layouts/app-layout.tsx"
+import { HomePage } from "@/pages/home.tsx"
 import { FeedPage } from "@/pages/feed.tsx"
 import { ProfilePage } from "@/pages/profile.tsx"
 import { SettingsPage } from "@/pages/settings.tsx"
@@ -13,9 +14,9 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route element={<AppLayout />}>
-            <Route path="/" element={<Navigate to="/feed" replace />} />
             <Route path="/feed" element={<FeedPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
