@@ -4,9 +4,12 @@ import { Badge } from "@/components/ui/badge.tsx"
 import { Button } from "@/components/ui/button.tsx"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card.tsx"
 import { Heart, MessageCircle, Share2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Link } from "react-router-dom"
 import { useUserRepository } from "@/providers/user-provider.tsx"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import { cn } from "@/lib/utils.ts"
 
 interface PostCardProps {
   post: Post
@@ -17,6 +20,9 @@ export function PostCard({ post }: PostCardProps) {
   const userRepository = useUserRepository()
   const [isFollowingAuthor, setIsFollowingAuthor] = useState<boolean | null>(null)
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [shouldShowReadMore, setShouldShowReadMore] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     userRepository
@@ -24,6 +30,17 @@ export function PostCard({ post }: PostCardProps) {
       .then((v) => setIsFollowingAuthor(!!v))
       .catch(() => setIsFollowingAuthor(false))
   }, [post.userId, userRepository])
+
+  useEffect(() => {
+    // Small delay to ensure styles are applied and we get correct measurements
+    const timeout = setTimeout(() => {
+      if (contentRef.current) {
+        const { scrollHeight, clientHeight } = contentRef.current
+        setShouldShowReadMore(scrollHeight > clientHeight)
+      }
+    }, 100)
+    return () => clearTimeout(timeout)
+  }, [post.caption])
 
   // Simple relative time formatter for stub
   const displayTime = post.createdAt.includes('T')
@@ -125,9 +142,25 @@ export function PostCard({ post }: PostCardProps) {
           )}
         </div>
         <div className="py-4 space-y-2">
-          <p className="text-base leading-relaxed">
-            {post.caption}
-          </p>
+          <div
+            ref={contentRef}
+            className={cn(
+              "text-base leading-relaxed prose prose-sm dark:prose-invert max-w-none transition-all duration-200",
+              !isExpanded && "line-clamp-5 overflow-hidden"
+            )}
+          >
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {post.caption}
+            </ReactMarkdown>
+          </div>
+          {shouldShowReadMore && !isExpanded && (
+            <button
+              onClick={() => setIsExpanded(true)}
+              className="text-sm font-semibold text-primary hover:underline mt-1"
+            >
+              Read more
+            </button>
+          )}
         </div>
       </CardContent>
 

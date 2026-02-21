@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card.tsx"
 import { Button } from "@/components/ui/button.tsx"
 import { Input } from "@/components/ui/input.tsx"
 import { Label } from "@/components/ui/label.tsx"
-import { Textarea } from "@/components/ui/textarea.tsx"
+import { MarkdownEditor } from "./markdown-editor.tsx"
 import { usePostRepository } from "@/providers/post-provider.tsx"
 import type { Post } from "@/domain/posts/types/post.ts"
 import { compressImage } from "@/lib/image-compression.ts"
@@ -121,7 +121,7 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
                     </div>
                   </div>
                 ))}
-                
+
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -132,7 +132,7 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
                 </button>
               </div>
             ) : (
-              <div 
+              <div
                 onClick={() => fileInputRef.current?.click()}
                 className="aspect-square sm:aspect-video rounded-3xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 flex flex-col items-center justify-center gap-4 text-muted-foreground hover:text-primary transition-all bg-muted/30 cursor-pointer group"
               >
@@ -145,7 +145,7 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
                 </div>
               </div>
             )}
-            
+
             <Input
               ref={fileInputRef}
               id="images"
@@ -160,15 +160,13 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
           <div className="space-y-4 px-1">
             <div className="space-y-2">
               <Label htmlFor="caption" className="text-sm font-semibold ml-1">Caption</Label>
-              <Textarea
-                id="caption"
-                placeholder="What's on your mind?..."
-                className="min-h-[120px] rounded-2xl resize-none border-muted-foreground/20 focus-visible:ring-primary/20 bg-muted/20"
+              <MarkdownEditor
                 value={caption}
-                onChange={(e) => setCaption(e.target.value)}
+                onChange={setCaption}
+                placeholder="What's on your mind?..."
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="tag" className="text-sm font-semibold ml-1">Tag</Label>
               <Input
@@ -185,8 +183,8 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
           {error && <div className="text-sm text-red-500 px-1">{error}</div>}
         </CardContent>
         <CardFooter className="p-0 pt-8 flex justify-end">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isUploading || files.length === 0}
             className="w-full sm:w-auto min-w-[140px] h-12 rounded-full font-bold text-base shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
           >
