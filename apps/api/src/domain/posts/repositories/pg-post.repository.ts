@@ -24,6 +24,11 @@ export class PgPostRepository implements PostRepository {
     const posts = await prisma.post.findMany({
       include: {
         author: true,
+        media: {
+          orderBy: {
+            order: "asc",
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -36,7 +41,12 @@ export class PgPostRepository implements PostRepository {
       authorName: post.author.displayName,
       authorUsername: post.author.username,
       authorAvatarUrl: post.author.avatarUrl || undefined,
-      imageUrl: this.toProxiedUrl(post.imageUrl) as string,
+      media: post.media.map((m: any) => ({
+        id: m.id,
+        url: this.toProxiedUrl(m.url) as string,
+        type: m.type,
+        order: m.order,
+      })),
       caption: post.caption,
       tag: post.tag,
       createdAt: post.createdAt.toISOString(),
@@ -50,6 +60,11 @@ export class PgPostRepository implements PostRepository {
       where: { userId },
       include: {
         author: true,
+        media: {
+          orderBy: {
+            order: "asc",
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
@@ -62,7 +77,12 @@ export class PgPostRepository implements PostRepository {
       authorName: post.author.displayName,
       authorUsername: post.author.username,
       authorAvatarUrl: post.author.avatarUrl || undefined,
-      imageUrl: this.toProxiedUrl(post.imageUrl) as string,
+      media: post.media.map((m: any) => ({
+        id: m.id,
+        url: this.toProxiedUrl(m.url) as string,
+        type: m.type,
+        order: m.order,
+      })),
       caption: post.caption,
       tag: post.tag,
       createdAt: post.createdAt.toISOString(),
@@ -76,6 +96,11 @@ export class PgPostRepository implements PostRepository {
       where: { id },
       include: {
         author: true,
+        media: {
+          orderBy: {
+            order: "asc",
+          },
+        },
       },
     })
 
@@ -87,7 +112,12 @@ export class PgPostRepository implements PostRepository {
       authorName: post.author.displayName,
       authorUsername: post.author.username,
       authorAvatarUrl: post.author.avatarUrl || undefined,
-      imageUrl: this.toProxiedUrl(post.imageUrl) as string,
+      media: post.media.map((m: any) => ({
+        id: m.id,
+        url: this.toProxiedUrl(m.url) as string,
+        type: m.type,
+        order: m.order,
+      })),
       caption: post.caption,
       tag: post.tag,
       createdAt: post.createdAt.toISOString(),
@@ -100,12 +130,23 @@ export class PgPostRepository implements PostRepository {
     const post = await prisma.post.create({
       data: {
         userId: postData.userId,
-        imageUrl: postData.imageUrl,
         caption: postData.caption,
         tag: postData.tag,
+        media: {
+          create: postData.media.map((m) => ({
+            url: m.url,
+            type: m.type,
+            order: m.order,
+          })),
+        },
       },
       include: {
         author: true,
+        media: {
+          orderBy: {
+            order: "asc",
+          },
+        },
       },
     })
 
@@ -115,7 +156,12 @@ export class PgPostRepository implements PostRepository {
       authorName: post.author.displayName,
       authorUsername: post.author.username,
       authorAvatarUrl: post.author.avatarUrl || undefined,
-      imageUrl: this.toProxiedUrl(post.imageUrl) as string,
+      media: post.media.map((m: any) => ({
+        id: m.id,
+        url: this.toProxiedUrl(m.url) as string,
+        type: m.type,
+        order: m.order,
+      })),
       caption: post.caption,
       tag: post.tag,
       createdAt: post.createdAt.toISOString(),

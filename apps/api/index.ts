@@ -52,27 +52,39 @@ app.post("/api/posts", hankoAuth, async (c) => {
   return c.json(post, 201)
 })
 
-// Upload image and create a post in a single request (multipart/form-data)
-app.post("/api/posts/image", hankoAuth, async (c) => {
+// Upload multiple images and create a post in a single request (multipart/form-data)
+app.post("/api/posts/images", hankoAuth, async (c) => {
   const userId = c.get("userId")
-  const form = await c.req.parseBody()
-  const image: any = (form as any)["image"]
-  const caption = typeof (form as any)["caption"] === "string" ? (form as any)["caption"] : ""
-  const tag = typeof (form as any)["tag"] === "string" ? (form as any)["tag"] : "General"
+  const form = await c.req.parseBody({ all: true })
+  const images: any[] = Array.isArray(form["images"]) ? form["images"] : [form["images"]]
+  const caption = typeof form["caption"] === "string" ? form["caption"] : ""
+  const tag = typeof form["tag"] === "string" ? form["tag"] : "General"
 
-  if (!image || typeof image.arrayBuffer !== "function") {
-    return c.json({ error: "Image file is required (field 'image')" }, 400)
+  const validImages = images.filter((img) => img && typeof img.arrayBuffer === "function")
+
+  if (validImages.length === 0) {
+    return c.json({ error: "At least one image file is required (field 'images')" }, 400)
   }
 
-  const fileName: string = typeof image.name === "string" ? image.name : `upload-${Date.now()}`
-  const contentType: string = typeof image.type === "string" && image.type ? image.type : "application/octet-stream"
-  const arrayBuffer = await image.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
+  const mediaItems = []
 
-  const key = `posts/${userId}/${Date.now()}-${fileName}`
-  const { key: storedKey } = await storageRepository.uploadFile(key, buffer, contentType)
+  for (let i = 0; i < validImages.length; i++) {
+    const image = validImages[i]
+    const fileName: string = typeof image.name === "string" ? image.name : `upload-${Date.now()}-${i}`
+    const contentType: string = typeof image.type === "string" && image.type ? image.type : "application/octet-stream"
+    const buffer = Buffer.from(await image.arrayBuffer())
 
-  const post = await postRepository.createPost({ userId, imageUrl: storedKey, caption, tag })
+    const key = `posts/${userId}/${Date.now()}-${fileName}`
+    const { key: storedKey } = await storageRepository.uploadFile(key, buffer, contentType)
+
+    mediaItems.push({
+      url: storedKey,
+      type: "image",
+      order: i,
+    })
+  }
+
+  const post = await postRepository.createPost({ userId, media: mediaItems, caption, tag })
   return c.json(post, 201)
 })
 

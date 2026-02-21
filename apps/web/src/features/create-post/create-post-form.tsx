@@ -16,47 +16,60 @@ interface CreatePostFormProps {
 
 export function CreatePostForm({ onCreated }: CreatePostFormProps) {
   const postRepository = usePostRepository()
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
   const [caption, setCaption] = useState("")
   const [tag, setTag] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || [])
+    if (selectedFiles.length > 0) {
+      setFiles(selectedFiles)
+      const newPreviews = selectedFiles.map((file) => URL.createObjectURL(file))
+      setPreviews(newPreviews)
+    }
+  }
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
-    if (!file) {
-      setError("Please select an image to upload.")
+    if (files.length === 0) {
+      setError("Please select at least one image to upload.")
       return
     }
 
-    const currentFile = file
+    const currentFiles = [...files]
     const currentCaption = caption
     const currentTag = tag || "General"
 
     // Reset form immediately
     setCaption("")
     setTag("")
-    setFile(null)
+    setFiles([])
+    setPreviews([])
     setSubmitting(false)
 
     // Notify user that upload started
     toast({
       title: "Uploading post...",
-      description: "Your post is being compressed and uploaded in the background.",
+      description: `Your ${currentFiles.length} images are being compressed and uploaded in the background.`,
     })
 
     // Perform compression and upload in background
     ;(async () => {
       try {
-        const compressedFile = await compressImage(currentFile, { maxSizeMB: 0.2 })
-        const created = await postRepository.createPostWithImage(compressedFile, currentCaption, currentTag)
-        
+        const compressedFiles = await Promise.all(
+          currentFiles.map((file) => compressImage(file, { maxSizeMB: 0.2 }))
+        )
+        const created = await postRepository.createPostWithImages(compressedFiles, currentCaption, currentTag)
+
         toast({
           title: "Post ready!",
           description: "Your post has been successfully uploaded and is now visible.",
         })
-        
+
         if (onCreated) onCreated(created)
       } catch (err) {
         console.error(err)
@@ -73,18 +86,28 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
     <Card className="border-none shadow-none bg-transparent">
       <form onSubmit={onSubmit} className="space-y-4">
         <CardHeader className="p-0">
-          <div className="text-sm font-medium">Share a new image</div>
+          <div className="text-sm font-medium">Share new images</div>
         </CardHeader>
         <CardContent className="p-0 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="image">Image</Label>
+            <Label htmlFor="images">Images</Label>
             <Input
-              id="image"
+              id="images"
               type="file"
               accept="image/*"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              multiple
+              onChange={handleFileChange}
             />
           </div>
+          {previews.length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {previews.map((preview, idx) => (
+                <div key={idx} className="aspect-square relative rounded-md overflow-hidden bg-muted">
+                  <img src={preview} alt={`Preview ${idx}`} className="object-cover w-full h-full" />
+                </div>
+              ))}
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="caption">Caption</Label>
             <Textarea

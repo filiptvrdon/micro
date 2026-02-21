@@ -1,3 +1,6 @@
+# 🏗 Architecture Guidelines
+
+> For a detailed technical overview of the system, see [SYSTEM_DESIGN.md](./SYSTEM_DESIGN.md).
 
 ## 🖼 Image Handling
 

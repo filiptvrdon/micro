@@ -5,5 +5,5 @@ export interface PostRepository {
   getPostsByUserId(userId: string): Promise<Post[]>
   getPostById(id: string): Promise<Post | null>
   createPost(post: Omit<Post, "id" | "createdAt" | "likesCount" | "commentsCount">): Promise<Post>
-  createPostWithImage(file: File, caption: string, tag: string): Promise<Post>
+  createPostWithImages(files: File[], caption: string, tag: string): Promise<Post>
 }

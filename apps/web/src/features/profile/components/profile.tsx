@@ -267,7 +267,7 @@ export function Profile({ profile, posts, onProfileUpdated, isOwnProfile = false
             {posts.map((post) => (
               <div key={post.id} className="aspect-square bg-muted rounded-sm overflow-hidden">
                 <img
-                  src={post.imageUrl}
+                  src={post.media[0]?.url || post.imageUrl}
                   alt={post.tag}
                   className="object-cover w-full h-full hover:opacity-90 transition-opacity cursor-pointer"
                 />
@@ -280,7 +280,7 @@ export function Profile({ profile, posts, onProfileUpdated, isOwnProfile = false
               <div key={post.id} className="flex items-center space-x-4 p-2 hover:bg-muted/50 rounded-md transition-colors">
                 <div className="h-16 w-16 flex-shrink-0 bg-muted rounded overflow-hidden">
                   <img
-                    src={post.imageUrl}
+                    src={post.media[0]?.url || post.imageUrl}
                     alt={post.tag}
                     className="object-cover w-full h-full"
                   />

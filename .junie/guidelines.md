@@ -49,4 +49,4 @@ All changes should be verified by building and running the application from the 
     - `HANKO_AUTH_URL`: Your Hanko instance URL.
     - `NODE_ENV`: `production`
 
-after each finished task, ask for permission to commit
+- after each finished task, ask for permission to commit

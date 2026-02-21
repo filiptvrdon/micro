@@ -28,10 +28,20 @@ model Post {
   id            String   @id @default(uuid())
   userId        String
   author        User     @relation("UserPosts", fields: [userId], references: [id])
-  imageUrl      String
   caption       String
   tag           String
   createdAt     DateTime @default(now())
   likesCount    Int      @default(0)
   commentsCount Int      @default(0)
+  media         Media[]  @relation("PostMedia")
+}
+
+model Media {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation("PostMedia", fields: [postId], references: [id], onDelete: Cascade)
+  url       String
+  type      String   @default("image")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
 }

@@ -1,6 +1,12 @@
+export interface CreatePostMediaInput {
+  url: string
+  type: string
+  order: number
+}
+
 export interface CreatePostInput {
   userId: string
-  imageUrl: string
+  media: CreatePostMediaInput[]
   caption: string
   tag: string
 }

@@ -4,7 +4,7 @@ A lightweight social media application built with a modern split architecture (F
 
 ## 🏗 Architecture
 
-The project follows a **Domain-Driven Feature** architecture and is split into two main parts:
+The project follows a **Domain-Driven Feature** architecture. For a detailed breakdown of the system design, see [SYSTEM_DESIGN.md](./docs/SYSTEM_DESIGN.md).
 
 - **`src/web`**: Pure React frontend (Vite, shadcn/ui).
 - **`src/api`**: Lightweight Hono backend server (Node.js, Prisma).

@@ -16,6 +16,7 @@ export function PostCard({ post }: PostCardProps) {
   const [liked, setLiked] = useState(false)
   const userRepository = useUserRepository()
   const [isFollowingAuthor, setIsFollowingAuthor] = useState<boolean | null>(null)
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0)
 
   useEffect(() => {
     userRepository
@@ -28,6 +29,9 @@ export function PostCard({ post }: PostCardProps) {
   const displayTime = post.createdAt.includes('T')
     ? new Date(post.createdAt).toLocaleDateString()
     : post.createdAt
+
+  const hasMultipleMedia = post.media.length > 1
+
 
   return (
     <Card className="border-none shadow-none overflow-hidden bg-transparent">
@@ -70,12 +74,55 @@ export function PostCard({ post }: PostCardProps) {
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className="aspect-square bg-muted rounded-xl flex items-center justify-center relative overflow-hidden">
-          <img
-            src={post.imageUrl}
-            alt="Training"
-            className="object-cover w-full h-full"
-          />
+        <div className={`bg-muted rounded-xl flex items-center justify-center relative overflow-hidden group ${hasMultipleMedia ? 'aspect-square' : ''}`}>
+          {post.media && post.media.length > 0 ? (
+            <img
+              src={post.media[currentMediaIndex].url}
+              alt={`Post media ${currentMediaIndex + 1}`}
+              className="object-cover w-full h-full transition-all duration-300"
+            />
+          ) : post.imageUrl ? (
+            <img
+              src={post.imageUrl}
+              alt="Post image"
+              className="object-cover w-full h-full"
+            />
+          ) : null}
+
+          {hasMultipleMedia && (
+            <>
+              <div className="absolute inset-0 flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+                  onClick={() => setCurrentMediaIndex((prev) => (prev === 0 ? post.media.length - 1 : prev - 1))}
+                >
+                  <span className="sr-only">Previous image</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left h-4 w-4"><path d="m15 18-6-6 6-6"/></svg>
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
+                  onClick={() => setCurrentMediaIndex((prev) => (prev === post.media.length - 1 ? 0 : prev + 1))}
+                >
+                  <span className="sr-only">Next image</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"/></svg>
+                </Button>
+              </div>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 p-1.5 rounded-full bg-background/50 backdrop-blur-md">
+                {post.media.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`h-1.5 w-1.5 rounded-full transition-all ${
+                      idx === currentMediaIndex ? "bg-primary w-3" : "bg-primary/30"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
         <div className="py-4 space-y-2">
           <p className="text-base leading-relaxed">
