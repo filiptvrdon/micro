@@ -23,6 +23,7 @@ export function PostCard({ post }: PostCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [shouldShowReadMore, setShouldShowReadMore] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
+  const mediaRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     userRepository
@@ -91,13 +92,31 @@ export function PostCard({ post }: PostCardProps) {
       </CardHeader>
 
       <CardContent className="p-0">
-        <div className={`bg-muted rounded-xl flex items-center justify-center relative overflow-hidden group ${hasMultipleMedia ? 'aspect-square' : ''}`}>
+        <div className={`bg-muted rounded-xl relative overflow-hidden group ${hasMultipleMedia ? 'aspect-square' : ''}`}>
           {post.media && post.media.length > 0 ? (
-            <img
-              src={post.media[currentMediaIndex].url}
-              alt={`Post media ${currentMediaIndex + 1}`}
-              className="object-cover w-full h-full transition-all duration-300"
-            />
+            <div
+              ref={mediaRef}
+              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide h-full w-full"
+              onScroll={(e) => {
+                const target = e.currentTarget
+                if (target.clientWidth > 0) {
+                  const index = Math.round(target.scrollLeft / target.clientWidth)
+                  if (index !== currentMediaIndex) {
+                    setCurrentMediaIndex(index)
+                  }
+                }
+              }}
+            >
+              {post.media.map((item, idx) => (
+                <div key={item.id} className="flex-none w-full h-full snap-center">
+                  <img
+                    src={item.url}
+                    alt={`Post media ${idx + 1}`}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+              ))}
+            </div>
           ) : post.imageUrl ? (
             <img
               src={post.imageUrl}
@@ -108,12 +127,20 @@ export function PostCard({ post }: PostCardProps) {
 
           {hasMultipleMedia && (
             <>
-              <div className="absolute inset-0 flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute inset-0 flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
-                  onClick={() => setCurrentMediaIndex((prev) => (prev === 0 ? post.media.length - 1 : prev - 1))}
+                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm pointer-events-auto"
+                  onClick={() => {
+                    const newIndex = currentMediaIndex === 0 ? post.media.length - 1 : currentMediaIndex - 1
+                    if (mediaRef.current) {
+                      mediaRef.current.scrollTo({
+                        left: newIndex * mediaRef.current.clientWidth,
+                        behavior: "smooth",
+                      })
+                    }
+                  }}
                 >
                   <span className="sr-only">Previous image</span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left h-4 w-4"><path d="m15 18-6-6 6-6"/></svg>
@@ -121,8 +148,16 @@ export function PostCard({ post }: PostCardProps) {
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm"
-                  onClick={() => setCurrentMediaIndex((prev) => (prev === post.media.length - 1 ? 0 : prev + 1))}
+                  className="h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm pointer-events-auto"
+                  onClick={() => {
+                    const newIndex = currentMediaIndex === post.media.length - 1 ? 0 : currentMediaIndex + 1
+                    if (mediaRef.current) {
+                      mediaRef.current.scrollTo({
+                        left: newIndex * mediaRef.current.clientWidth,
+                        behavior: "smooth",
+                      })
+                    }
+                  }}
                 >
                   <span className="sr-only">Next image</span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right h-4 w-4"><path d="m9 18 6-6-6-6"/></svg>
@@ -153,12 +188,12 @@ export function PostCard({ post }: PostCardProps) {
               {post.caption}
             </ReactMarkdown>
           </div>
-          {shouldShowReadMore && !isExpanded && (
+          {shouldShowReadMore && (
             <button
-              onClick={() => setIsExpanded(true)}
+              onClick={() => setIsExpanded(!isExpanded)}
               className="text-sm font-semibold text-primary hover:underline mt-1"
             >
-              Read more
+              {isExpanded ? "Show less" : "Read more"}
             </button>
           )}
         </div>

@@ -13,7 +13,7 @@ export function UploadPage() {
         </p>
       </div>
       <div className="pt-2">
-        <CreatePostForm onCreated={() => navigate("/")} />
+        <CreatePostForm onCreated={() => navigate("/feed")} />
       </div>
     </div>
   )
