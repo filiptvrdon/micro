@@ -1,23 +1,20 @@
 import { CreatePostForm } from "@/features/create-post/create-post-form.tsx"
 import { useNavigate } from "react-router-dom"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card.tsx"
 
 export function UploadPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="py-10 space-y-6">
-      <Card className="border-none shadow-none bg-transparent">
-        <CardHeader className="px-0">
-          <CardTitle className="text-2xl">Create Post</CardTitle>
-          <CardDescription>
-            Share your favorite moments with your followers.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-0 pt-6">
-          <CreatePostForm onCreated={() => navigate("/")} />
-        </CardContent>
-      </Card>
+    <div className="py-6 px-4 max-w-2xl mx-auto space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight">Create Post</h1>
+        <p className="text-muted-foreground">
+          Share your favorite moments with your followers.
+        </p>
+      </div>
+      <div className="pt-2">
+        <CreatePostForm onCreated={() => navigate("/")} />
+      </div>
     </div>
   )
 }
