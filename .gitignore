@@ -26,6 +26,7 @@ dist-ssr
 *.sw?
 
 /generated/prisma
+eslint_errors.txt
 
 # Environment variables
 .env
