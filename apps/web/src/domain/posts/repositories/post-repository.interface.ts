@@ -6,4 +6,5 @@ export interface PostRepository {
   getPostById(id: string): Promise<Post | null>
   createPost(post: Omit<Post, "id" | "createdAt" | "likesCount" | "commentsCount">): Promise<Post>
   createPostWithImages(files: File[], caption: string, tag: string): Promise<Post>
+  createPostWithMedia(files: File[], caption: string, tag: string): Promise<Post>
 }

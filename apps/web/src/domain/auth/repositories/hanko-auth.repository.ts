@@ -32,7 +32,7 @@ export class HankoAuthRepository implements AuthRepository {
         jwt: token,
         isValid: true, // We should verify it separately if needed
       };
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -54,7 +54,7 @@ export class HankoAuthRepository implements AuthRepository {
 
   async logout(): Promise<void> {
     if (!hankoApi) return;
-    // @ts-ignore - hanko.user is private in some versions of the SDK but we need to call logout on it
+    // @ts-expect-error - hanko.user is private in some versions of the SDK but we need to call logout on it
     await this.hanko.user.logout();
   }
 }

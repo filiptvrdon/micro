@@ -61,21 +61,25 @@ export class ApiPostRepository implements PostRepository {
   }
 
   async createPostWithImages(files: File[], caption: string, tag: string): Promise<Post> {
+    return this.createPostWithMedia(files, caption, tag)
+  }
+
+  async createPostWithMedia(files: File[], caption: string, tag: string): Promise<Post> {
     const formData = new FormData()
     files.forEach((file) => {
-      formData.append("images", file)
+      formData.append("media", file)
     })
     formData.append("caption", caption)
     formData.append("tag", tag)
 
     const headers = this.getAuthHeaders()
 
-    const response = await fetch(`${API_URL}/api/posts/images`, {
+    const response = await fetch(`${API_URL}/api/posts/media`, {
       method: "POST",
       headers, // do NOT set Content-Type; browser will set multipart boundary
       body: formData,
     })
-    if (!response.ok) throw new Error("Failed to create post with images")
+    if (!response.ok) throw new Error("Failed to create post with media")
     return response.json()
   }
 }

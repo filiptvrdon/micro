@@ -1,11 +1,9 @@
+# 💾 Data Philosophy
 
-## 💾 Data Model Philosophy
-Store only what is necessary to operate. Avoid behavioral tracking or metadata harvesting.
+Store only what is necessary to operate. No behavioral tracking or metadata harvesting.
 
-
-**Strictly Forbidden:**
-* Behavioral tracking
-* Location metadata
-* Device fingerprinting
-* Interest profiles
-* Shadow analytics
+## 🛡 Privacy Rules
+- **GDPR**: EU-based hosting and data residency.
+- **Minimization**: No location harvesting, device fingerprinting, or interest profiles.
+- **Transparency**: No shadow analytics or selling user data.
+- **Media**: All EXIF metadata must be stripped before storage.

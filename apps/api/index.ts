@@ -17,6 +17,11 @@ const app = new Hono<{
 }>()
 
 app.use("/*", cors())
+app.use("/*", async (c, next) => {
+  await next()
+  c.header("Cross-Origin-Embedder-Policy", "require-corp")
+  c.header("Cross-Origin-Opener-Policy", "same-origin")
+})
 
 const postRepository = new PgPostRepository()
 const userRepository = new PgUserRepository()
@@ -52,34 +57,36 @@ app.post("/api/posts", hankoAuth, async (c) => {
   return c.json(post, 201)
 })
 
-// Upload multiple images and create a post in a single request (multipart/form-data)
-app.post("/api/posts/images", hankoAuth, async (c) => {
+// Upload multiple media items (images/videos) and create a post in a single request (multipart/form-data)
+app.post("/api/posts/media", hankoAuth, async (c) => {
   const userId = c.get("userId")
   const form = await c.req.parseBody({ all: true })
-  const images: any[] = Array.isArray(form["images"]) ? form["images"] : [form["images"]]
+  const mediaRaw = form["media"]
+  const media = Array.isArray(mediaRaw) ? mediaRaw : (mediaRaw ? [mediaRaw] : [])
   const caption = typeof form["caption"] === "string" ? form["caption"] : ""
   const tag = typeof form["tag"] === "string" ? form["tag"] : "General"
 
-  const validImages = images.filter((img) => img && typeof img.arrayBuffer === "function")
+  const validMedia = media.filter((m): m is File => typeof m !== "string" && !!(m && typeof m.arrayBuffer === "function"))
 
-  if (validImages.length === 0) {
-    return c.json({ error: "At least one image file is required (field 'images')" }, 400)
+  if (validMedia.length === 0) {
+    return c.json({ error: "At least one media file is required (field 'media')" }, 400)
   }
 
   const mediaItems = []
 
-  for (let i = 0; i < validImages.length; i++) {
-    const image = validImages[i]
-    const fileName: string = typeof image.name === "string" ? image.name : `upload-${Date.now()}-${i}`
-    const contentType: string = typeof image.type === "string" && image.type ? image.type : "application/octet-stream"
-    const buffer = Buffer.from(await image.arrayBuffer())
+  for (let i = 0; i < validMedia.length; i++) {
+    const item = validMedia[i]
+    const fileName: string = typeof item.name === "string" ? item.name : `upload-${Date.now()}-${i}`
+    const contentType: string = typeof item.type === "string" && item.type ? item.type : "application/octet-stream"
+    const buffer = Buffer.from(await item.arrayBuffer())
 
+    const type = contentType.startsWith("video/") ? "video" : "image"
     const key = `posts/${userId}/${Date.now()}-${fileName}`
     const { key: storedKey } = await storageRepository.uploadFile(key, buffer, contentType)
 
     mediaItems.push({
       url: storedKey,
-      type: "image",
+      type,
       order: i,
     })
   }
@@ -111,8 +118,8 @@ app.put("/api/users/current", hankoAuth, async (c) => {
 app.post("/api/users/current/avatar", hankoAuth, async (c) => {
   const userId = c.get("userId")
   const form = await c.req.parseBody()
-  const image: any = (form as any)["avatar"] || (form as any)["image"]
-  if (!image || typeof image.arrayBuffer !== "function") {
+  const image = form["avatar"] || form["image"]
+  if (!image || typeof image === "string" || typeof image.arrayBuffer !== "function") {
     return c.json({ error: "Avatar file is required (field 'avatar')" }, 400)
   }
   const fileName: string = typeof image.name === "string" ? image.name : `avatar-${Date.now()}`
@@ -157,9 +164,9 @@ app.get("/api/users/search", async (c) => {
   return c.json(users)
 })
 
-app.get("/api/users/new", async (c) => {
-  const limit = parseInt(c.req.query("limit") || "10")
-  const users = await userRepository.getNewUsers(limit)
+app.get("/api/users", async (c) => {
+  const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!) : undefined
+  const users = await userRepository.getUsers(limit)
   return c.json(users)
 })
 
@@ -192,18 +199,35 @@ app.get("/api/users/:id/is-following", hankoAuth, async (c) => {
   return c.json({ isFollowing: following })
 })
 
-// Media proxy: redirect to short-lived signed S3 URL
+// Media proxy: stream from S3 to handle CORS and COEP correctly
 app.get("/media/*", async (c) => {
   const path = c.req.path
   const prefix = "/media/"
   const key = decodeURI(path.startsWith(prefix) ? path.slice(prefix.length) : path)
   if (!key) return c.text("Missing key", 400)
+
   try {
-    const signed = await storageRepository.getSignedUrl(key, 300)
-    return c.redirect(signed, 302)
-  } catch (e) {
-    console.error("Failed to sign media URL", e)
-    return c.text("Not found", 404)
+    const range = c.req.header("Range")
+    const res = await storageRepository.downloadFile(key, range)
+
+    if (res.ContentType) c.header("Content-Type", res.ContentType)
+    if (res.ContentLength) c.header("Content-Length", res.ContentLength.toString())
+    if (res.ContentRange) c.header("Content-Range", res.ContentRange)
+    if (res.AcceptRanges) c.header("Accept-Ranges", res.AcceptRanges)
+
+    // Explicitly allow cross-origin resource sharing/policy for COEP compatibility
+    c.header("Cross-Origin-Resource-Policy", "cross-origin")
+    c.header("Access-Control-Allow-Origin", "*")
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return c.body(res.Body as any, res.Status as any)
+  } catch (e: unknown) {
+    const error = e as { name?: string }
+    if (error.name === "NoSuchKey" || error.name === "NotFound") {
+      return c.text("Not found", 404)
+    }
+    console.error("Failed to proxy media", e)
+    return c.text("Internal server error", 500)
   }
 })
 
@@ -225,7 +249,7 @@ app.get("*", async (c) => {
     return c.html(html, 200, {
       "Cache-Control": "no-store",
     })
-  } catch (e) {
+  } catch {
     return c.text("Frontend not built or index.html missing", 404)
   }
 })

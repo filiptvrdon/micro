@@ -5,18 +5,34 @@ import { prisma } from "../../prisma/client.js"
 export class PgUserRepository implements UserRepository {
   private toProxiedUrl(value?: string | null): string | undefined {
     if (!value) return undefined
+    if (value.startsWith("/media/")) return value
+
     let key = value
-    if (value.startsWith("http")) {
-      const endpoint = (process.env.S3_ENDPOINT || "").replace(/\/+$/, "")
-      const bucket = process.env.S3_BUCKET || ""
-      const prefix = endpoint && bucket ? `${endpoint}/${bucket}/` : ""
-      if (prefix && value.startsWith(prefix)) {
-        key = decodeURI(value.slice(prefix.length))
-      } else {
-        return value
+    const endpoint = (process.env.S3_ENDPOINT || "").replace(/\/+$/, "")
+    const bucket = process.env.S3_BUCKET || ""
+
+    if (endpoint && bucket && value.includes(endpoint) && value.includes(bucket)) {
+      const searchStr = `${bucket}/`
+      const index = value.indexOf(searchStr)
+      if (index !== -1) {
+        key = decodeURI(value.slice(index + searchStr.length))
       }
+    } else if (value.startsWith("http")) {
+      return value
     }
+
     return `/media/${encodeURI(key)}`
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private mapUser(user: any): User {
+    return {
+      id: user.id,
+      username: user.username,
+      displayName: user.displayName,
+      avatarUrl: this.toProxiedUrl(user.avatarUrl) || undefined,
+      bio: user.bio || undefined,
+    }
   }
 
   async ensureUserExists(userId: string): Promise<void> {
@@ -44,13 +60,7 @@ export class PgUserRepository implements UserRepository {
 
     if (!user) return null
 
-    return {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      avatarUrl: this.toProxiedUrl(user.avatarUrl) || undefined,
-      bio: user.bio || undefined,
-    }
+    return this.mapUser(user)
   }
 
   async getUserById(id: string): Promise<User | null> {
@@ -60,13 +70,7 @@ export class PgUserRepository implements UserRepository {
 
     if (!user) return null
 
-    return {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      avatarUrl: this.toProxiedUrl(user.avatarUrl) || undefined,
-      bio: user.bio || undefined,
-    }
+    return this.mapUser(user)
   }
 
   async getUserProfile(username: string): Promise<UserProfile | null> {
@@ -86,11 +90,7 @@ export class PgUserRepository implements UserRepository {
     if (!user) return null
 
     return {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      avatarUrl: this.toProxiedUrl(user.avatarUrl) || undefined,
-      bio: user.bio || undefined,
+      ...this.mapUser(user),
       postCount: user._count.posts,
       followerCount: user._count.followedBy,
       followingCount: user._count.following,
@@ -107,13 +107,7 @@ export class PgUserRepository implements UserRepository {
 
     if (!user) return []
 
-    return user.following.map((u: any) => ({
-      id: u.id,
-      username: u.username,
-      displayName: u.displayName,
-      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
-      bio: u.bio || undefined,
-    }))
+    return user.following.map((u) => this.mapUser(u))
   }
 
   async getFollowers(userId: string): Promise<User[]> {
@@ -126,13 +120,7 @@ export class PgUserRepository implements UserRepository {
 
     if (!user) return []
 
-    return user.followedBy.map((u: any) => ({
-      id: u.id,
-      username: u.username,
-      displayName: u.displayName,
-      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
-      bio: u.bio || undefined,
-    }))
+    return user.followedBy.map((u) => this.mapUser(u))
   }
 
   async updateUser(userId: string, data: { username?: string; displayName?: string; bio?: string; avatarUrl?: string }): Promise<User> {
@@ -146,13 +134,7 @@ export class PgUserRepository implements UserRepository {
       },
     })
 
-    return {
-      id: updated.id,
-      username: updated.username,
-      displayName: updated.displayName,
-      avatarUrl: this.toProxiedUrl(updated.avatarUrl) || undefined,
-      bio: updated.bio || undefined,
-    }
+    return this.mapUser(updated)
   }
 
   async searchUsers(query: string): Promise<User[]> {
@@ -166,28 +148,16 @@ export class PgUserRepository implements UserRepository {
       take: 20,
     })
 
-    return users.map((u: any) => ({
-      id: u.id,
-      username: u.username,
-      displayName: u.displayName,
-      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
-      bio: u.bio || undefined,
-    }))
+    return users.map((u) => this.mapUser(u))
   }
 
-  async getNewUsers(limit: number): Promise<User[]> {
+  async getUsers(limit?: number): Promise<User[]> {
     const users = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       take: limit,
     })
 
-    return users.map((u: any) => ({
-      id: u.id,
-      username: u.username,
-      displayName: u.displayName,
-      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
-      bio: u.bio || undefined,
-    }))
+    return users.map((u) => this.mapUser(u))
   }
 
   async followUser(followerId: string, followingId: string): Promise<void> {
@@ -233,13 +203,7 @@ export class PgUserRepository implements UserRepository {
       take: 30,
     })
 
-    const users = posts.map((p: any) => p.author)
-    return users.map((u: any) => ({
-      id: u.id,
-      username: u.username,
-      displayName: u.displayName,
-      avatarUrl: this.toProxiedUrl(u.avatarUrl) || undefined,
-      bio: u.bio || undefined,
-    }))
+    const users = posts.map((p) => p.author)
+    return users.map((u) => this.mapUser(u))
   }
 }

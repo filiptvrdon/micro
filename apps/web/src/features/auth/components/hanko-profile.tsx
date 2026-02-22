@@ -17,6 +17,6 @@ export function HankoProfile() {
     });
   }, []);
 
-  // @ts-ignore
+  // @ts-expect-error - Hanko is a web component
   return <hanko-profile theme={theme === "system" ? undefined : theme} />;
 }

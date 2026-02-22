@@ -9,7 +9,7 @@ export interface UserRepository {
   updateCurrentUser(data: { username?: string; displayName?: string; bio?: string }): Promise<User>
   uploadCurrentUserAvatar(file: File): Promise<User>
   searchUsers(query: string): Promise<User[]>
-  getNewUsers(limit: number): Promise<User[]>
+  getUsers(limit?: number): Promise<User[]>
   getUsersByTag(tag: string): Promise<User[]>
   followUser(userId: string): Promise<void>
   unfollowUser(userId: string): Promise<void>

@@ -9,7 +9,8 @@ import { usePostRepository } from "@/providers/post-provider.tsx"
 import type { Post } from "@/domain/posts/types/post.ts"
 import { compressImage } from "@/lib/image-compression.ts"
 import { toast } from "@/hooks/use-toast.ts"
-import { X, Image as ImageIcon, Plus, Loader2 } from "lucide-react"
+import { X, Image as ImageIcon, Plus, Loader2, Video as VideoIcon } from "lucide-react"
+import { processVideo } from "@/lib/video-processing.ts"
 
 interface CreatePostFormProps {
   onCreated?: (post: Post) => void
@@ -50,7 +51,7 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
     e.preventDefault()
     setError(null)
     if (files.length === 0) {
-      setError("Please select at least one image to upload.")
+      setError("Please select at least one media file to upload.")
       return
     }
 
@@ -61,16 +62,20 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
     const currentTag = tag || "General"
 
     try {
-      // Notify user that upload started
       toast({
         title: "Uploading post...",
-        description: `Your ${currentFiles.length} images are being compressed and uploaded.`,
+        description: `Your ${currentFiles.length} media items are being processed and uploaded.`,
       })
 
-      const compressedFiles = await Promise.all(
-        currentFiles.map((file) => compressImage(file, { maxSizeMB: 0.2 }))
+      const processedFiles = await Promise.all(
+        currentFiles.map(async (file) => {
+          if (file.type.startsWith("video/")) {
+            return processVideo(file)
+          }
+          return compressImage(file, { maxSizeMB: 0.2 })
+        })
       )
-      const created = await postRepository.createPostWithImages(compressedFiles, currentCaption, currentTag)
+      const created = await postRepository.createPostWithMedia(processedFiles, currentCaption, currentTag)
 
       toast({
         title: "Post ready!",
@@ -104,23 +109,30 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
           <div className="space-y-4">
             {previews.length > 0 ? (
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x px-1">
-                {previews.map((preview, idx) => (
-                  <div key={idx} className="relative flex-none w-48 aspect-[3/4] rounded-xl overflow-hidden bg-muted shadow-sm snap-start group">
-                    <img src={preview} alt={`Preview ${idx}`} className="object-cover w-full h-full" />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                      onClick={() => removeFile(idx)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                    <div className="absolute bottom-2 left-2 bg-black/40 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full">
-                      {idx + 1} / {previews.length}
+                {previews.map((preview, idx) => {
+                  const isVideo = files[idx]?.type.startsWith("video/")
+                  return (
+                    <div key={idx} className="relative flex-none w-48 aspect-[3/4] rounded-xl overflow-hidden bg-muted shadow-sm snap-start group">
+                      {isVideo ? (
+                        <video src={preview} className="object-cover w-full h-full" muted crossOrigin="anonymous" />
+                      ) : (
+                        <img src={preview} alt={`Preview ${idx}`} className="object-cover w-full h-full" crossOrigin="anonymous" />
+                      )}
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        onClick={() => removeFile(idx)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                      <div className="absolute bottom-2 left-2 bg-black/40 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full">
+                        {idx + 1} / {previews.length}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
 
                 <button
                   type="button"
@@ -137,10 +149,13 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
                 className="aspect-square sm:aspect-video rounded-3xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 flex flex-col items-center justify-center gap-4 text-muted-foreground hover:text-primary transition-all bg-muted/30 cursor-pointer group"
               >
                 <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <ImageIcon className="h-8 w-8" />
+                  <div className="flex gap-2">
+                    <ImageIcon className="h-8 w-8" />
+                    <VideoIcon className="h-8 w-8" />
+                  </div>
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold">Tap to upload images</p>
+                  <p className="font-semibold">Tap to upload images or videos</p>
                   <p className="text-xs">Multiple files supported</p>
                 </div>
               </div>
@@ -150,7 +165,7 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
               ref={fileInputRef}
               id="images"
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               multiple
               className="hidden"
               onChange={handleFileChange}

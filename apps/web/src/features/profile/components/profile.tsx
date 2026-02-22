@@ -81,7 +81,7 @@ export function Profile({ profile, posts, onProfileUpdated, isOwnProfile = false
       {/* Profile Header */}
       <div className="flex flex-col items-center space-y-4 pt-4">
         <Avatar className="h-24 w-24">
-          <AvatarImage src={profile.avatarUrl} />
+          <AvatarImage src={profile.avatarUrl} crossOrigin="anonymous" />
           <AvatarFallback className="text-2xl">{profile.displayName[0]}</AvatarFallback>
         </Avatar>
 
@@ -216,7 +216,7 @@ export function Profile({ profile, posts, onProfileUpdated, isOwnProfile = false
             {(listMode === "followers" ? followers : followingList).map((u) => (
               <Link key={u.id} to={`/profile/${u.username}`} className="flex items-center gap-3 p-2 rounded hover:bg-muted/50">
                 <Avatar className="h-7 w-7">
-                  <AvatarImage src={u.avatarUrl} />
+                  <AvatarImage src={u.avatarUrl} crossOrigin="anonymous" />
                   <AvatarFallback>{u.displayName[0]}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
@@ -264,37 +264,72 @@ export function Profile({ profile, posts, onProfileUpdated, isOwnProfile = false
       {posts.length > 0 ? (
         viewMode === "grid" ? (
           <div className="grid grid-cols-3 gap-1">
-            {posts.map((post) => (
-              <div key={post.id} className="aspect-square bg-muted rounded-sm overflow-hidden">
-                <img
-                  src={post.media[0]?.url || post.imageUrl}
-                  alt={post.tag}
-                  className="object-cover w-full h-full hover:opacity-90 transition-opacity cursor-pointer"
-                />
-              </div>
-            ))}
+            {posts.map((post) => {
+              const firstMedia = post.media[0]
+              const isVideo = firstMedia?.type === "video"
+              return (
+                <div key={post.id} className="aspect-square bg-muted rounded-sm overflow-hidden relative">
+                  {isVideo ? (
+                    <video
+                      src={firstMedia.url}
+                      className="object-cover w-full h-full hover:opacity-90 transition-opacity cursor-pointer"
+                      muted
+                      playsInline
+                      crossOrigin="anonymous"
+                      onMouseEnter={(e) => e.currentTarget.play()}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.pause()
+                        e.currentTarget.currentTime = 0
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={firstMedia?.url || post.imageUrl}
+                      alt={post.tag}
+                      className="object-cover w-full h-full hover:opacity-90 transition-opacity cursor-pointer"
+                      crossOrigin="anonymous"
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
         ) : (
           <div className="space-y-4">
-            {posts.map((post) => (
-              <div key={post.id} className="flex items-center space-x-4 p-2 hover:bg-muted/50 rounded-md transition-colors">
-                <div className="h-16 w-16 flex-shrink-0 bg-muted rounded overflow-hidden">
-                  <img
-                    src={post.media[0]?.url || post.imageUrl}
-                    alt={post.tag}
-                    className="object-cover w-full h-full"
-                  />
+            {posts.map((post) => {
+              const firstMedia = post.media[0]
+              const isVideo = firstMedia?.type === "video"
+              return (
+                <div key={post.id} className="flex items-center space-x-4 p-2 hover:bg-muted/50 rounded-md transition-colors">
+                  <div className="h-16 w-16 flex-shrink-0 bg-muted rounded overflow-hidden">
+                    {isVideo ? (
+                      <video
+                        src={firstMedia.url}
+                        className="object-cover w-full h-full"
+                        muted
+                        playsInline
+                        crossOrigin="anonymous"
+                      />
+                    ) : (
+                      <img
+                        src={firstMedia?.url || post.imageUrl}
+                        alt={post.tag}
+                        className="object-cover w-full h-full"
+                        crossOrigin="anonymous"
+                      />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {post.caption}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      #{post.tag}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {post.caption}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    #{post.tag}
-                  </p>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )
       ) : (

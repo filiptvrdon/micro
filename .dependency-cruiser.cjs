@@ -264,7 +264,7 @@ module.exports = {
 
     // Which modules to exclude
     exclude : {
-       path: ['apps/web/postcss.config.js', 'node_modules/jose']
+       path: ['apps/web/postcss.config.js', 'node_modules/jose', '^apps/(web|api)/(dist|public)/']
     },
 
     // Which modules to exclusively include (array of regular expressions in strings)

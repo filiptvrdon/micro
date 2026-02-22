@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import type { AuthSession } from "@/domain/auth/types/session.ts";
 import type { AuthRepository } from "@/domain/auth/repositories/auth-repository.interface.ts";
@@ -23,8 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkSession = async () => {
-    setIsLoading(true);
+  const checkSession = useCallback(async () => {
     const currentSession = authRepository.getSession();
     if (currentSession) {
       const isValid = await authRepository.verifySession(currentSession.jwt);
@@ -37,11 +36,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
     }
     setIsLoading(false);
-  };
+  }, [authRepository]);
 
   useEffect(() => {
-    checkSession();
-  }, [authRepository]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void checkSession();
+  }, [checkSession]);
 
   const logout = async () => {
     await authRepository.logout();
@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginAsDev = async () => {
     if (authRepository instanceof DevAuthRepository) {
+      setIsLoading(true);
       await authRepository.loginAsDev();
       await checkSession();
     }
@@ -62,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

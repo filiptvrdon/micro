@@ -11,23 +11,23 @@ export function ExplorePage() {
   const userRepository = useUserRepository()
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<User[]>([])
-  const [newUsers, setNewUsers] = useState<User[]>([])
+  const [allUsers, setAllUsers] = useState<User[]>([])
   const [loadingSearch, setLoadingSearch] = useState(false)
-  const [loadingNew, setLoadingNew] = useState(true)
+  const [loadingUsers, setLoadingUsers] = useState(true)
   const [following, setFollowing] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
-    const loadNew = async () => {
+    const loadUsers = async () => {
       try {
-        const users = await userRepository.getNewUsers(12)
-        setNewUsers(users)
+        const users = await userRepository.getUsers()
+        setAllUsers(users)
       } catch (e) {
-        console.error("Failed to load new users", e)
+        console.error("Failed to load users", e)
       } finally {
-        setLoadingNew(false)
+        setLoadingUsers(false)
       }
     }
-    loadNew()
+    loadUsers()
   }, [userRepository])
 
   useEffect(() => {
@@ -99,14 +99,14 @@ export function ExplorePage() {
 
       {!query.trim() && (
         <div>
-          <h3 className="text-sm font-semibold mb-3 text-muted-foreground">New arrivals</h3>
-          {loadingNew ? (
+          <h3 className="text-sm font-semibold mb-3 text-muted-foreground">All users</h3>
+          {loadingUsers ? (
             <div className="text-center text-sm text-muted-foreground py-8">Loading...</div>
-          ) : newUsers.length === 0 ? (
+          ) : allUsers.length === 0 ? (
             <div className="text-center text-sm text-muted-foreground py-8">No users yet.</div>
           ) : (
             <div className="grid grid-cols-1 gap-3">
-              {newUsers.map((u) => (
+              {allUsers.map((u) => (
                 <UserRow key={u.id} user={u} followed={!!following[u.id]} onToggleFollow={() => toggleFollow(u.id)} />
               ))}
             </div>
@@ -139,7 +139,7 @@ function UserRow({ user, followed, onToggleFollow }: { user: User; followed: boo
     <Card className="p-3 flex items-center gap-3">
       <Link to={`/profile/${user.username}`} className="flex items-center gap-3 flex-1 min-w-0">
         <Avatar className="h-9 w-9">
-          <AvatarImage src={user.avatarUrl} />
+          <AvatarImage src={user.avatarUrl} crossOrigin="anonymous" />
           <AvatarFallback>{user.displayName[0]}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">

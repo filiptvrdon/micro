@@ -107,4 +107,27 @@ export class S3StorageRepository implements StorageRepository {
 
     return results;
   }
+  async downloadFile(key: string, range?: string): Promise<{
+    Body?: unknown;
+    ContentType?: string;
+    ContentLength?: number;
+    ContentRange?: string;
+    AcceptRanges?: string;
+    Status: number;
+  }> {
+    const res = await this.client.send(new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+      Range: range,
+    }));
+
+    return {
+      Body: res.Body,
+      ContentType: res.ContentType,
+      ContentLength: res.ContentLength,
+      ContentRange: res.ContentRange,
+      AcceptRanges: res.AcceptRanges,
+      Status: res.$metadata.httpStatusCode || (range ? 206 : 200),
+    };
+  }
 }

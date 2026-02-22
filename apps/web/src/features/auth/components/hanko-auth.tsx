@@ -35,6 +35,6 @@ export function HankoAuth() {
     });
   }, []);
 
-  // @ts-ignore
+  // @ts-expect-error - Hanko is a web component
   return <hanko-auth theme={theme === "system" ? undefined : theme} />;
 }

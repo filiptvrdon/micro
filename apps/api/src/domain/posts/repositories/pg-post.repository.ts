@@ -6,18 +6,46 @@ import { prisma } from "../../prisma/client.js"
 export class PgPostRepository implements PostRepository {
   private toProxiedUrl(value?: string | null): string | undefined {
     if (!value) return undefined
+    if (value.startsWith("/media/")) return value
+
     let key = value
-    if (value.startsWith("http")) {
-      const endpoint = (process.env.S3_ENDPOINT || "").replace(/\/+$/, "")
-      const bucket = process.env.S3_BUCKET || ""
-      const prefix = endpoint && bucket ? `${endpoint}/${bucket}/` : ""
-      if (prefix && value.startsWith(prefix)) {
-        key = decodeURI(value.slice(prefix.length))
-      } else {
-        return value
+    const endpoint = (process.env.S3_ENDPOINT || "").replace(/\/+$/, "")
+    const bucket = process.env.S3_BUCKET || ""
+
+    if (endpoint && bucket && value.includes(endpoint) && value.includes(bucket)) {
+      const searchStr = `${bucket}/`
+      const index = value.indexOf(searchStr)
+      if (index !== -1) {
+        key = decodeURI(value.slice(index + searchStr.length))
       }
+    } else if (value.startsWith("http")) {
+      return value
     }
+
     return `/media/${encodeURI(key)}`
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private mapPost(post: any): Post {
+    return {
+      id: post.id,
+      userId: post.userId,
+      authorName: post.author.displayName,
+      authorUsername: post.author.username,
+      authorAvatarUrl: post.author.avatarUrl || undefined,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      media: post.media.map((m: any) => ({
+        id: m.id,
+        url: this.toProxiedUrl(m.url) as string,
+        type: m.type,
+        order: m.order,
+      })),
+      caption: post.caption,
+      tag: post.tag,
+      createdAt: post.createdAt.toISOString(),
+      likesCount: post.likesCount,
+      commentsCount: post.commentsCount,
+    }
   }
 
   async getFeed(): Promise<Post[]> {
@@ -35,24 +63,7 @@ export class PgPostRepository implements PostRepository {
       },
     })
 
-    return posts.map((post: any) => ({
-      id: post.id,
-      userId: post.userId,
-      authorName: post.author.displayName,
-      authorUsername: post.author.username,
-      authorAvatarUrl: post.author.avatarUrl || undefined,
-      media: post.media.map((m: any) => ({
-        id: m.id,
-        url: this.toProxiedUrl(m.url) as string,
-        type: m.type,
-        order: m.order,
-      })),
-      caption: post.caption,
-      tag: post.tag,
-      createdAt: post.createdAt.toISOString(),
-      likesCount: post.likesCount,
-      commentsCount: post.commentsCount,
-    }))
+    return posts.map((post) => this.mapPost(post))
   }
 
   async getPostsByUserId(userId: string): Promise<Post[]> {
@@ -71,24 +82,7 @@ export class PgPostRepository implements PostRepository {
       },
     })
 
-    return posts.map((post: any) => ({
-      id: post.id,
-      userId: post.userId,
-      authorName: post.author.displayName,
-      authorUsername: post.author.username,
-      authorAvatarUrl: post.author.avatarUrl || undefined,
-      media: post.media.map((m: any) => ({
-        id: m.id,
-        url: this.toProxiedUrl(m.url) as string,
-        type: m.type,
-        order: m.order,
-      })),
-      caption: post.caption,
-      tag: post.tag,
-      createdAt: post.createdAt.toISOString(),
-      likesCount: post.likesCount,
-      commentsCount: post.commentsCount,
-    }))
+    return posts.map((post) => this.mapPost(post))
   }
 
   async getPostById(id: string): Promise<Post | null> {
@@ -106,24 +100,7 @@ export class PgPostRepository implements PostRepository {
 
     if (!post) return null
 
-    return {
-      id: post.id,
-      userId: post.userId,
-      authorName: post.author.displayName,
-      authorUsername: post.author.username,
-      authorAvatarUrl: post.author.avatarUrl || undefined,
-      media: post.media.map((m: any) => ({
-        id: m.id,
-        url: this.toProxiedUrl(m.url) as string,
-        type: m.type,
-        order: m.order,
-      })),
-      caption: post.caption,
-      tag: post.tag,
-      createdAt: post.createdAt.toISOString(),
-      likesCount: post.likesCount,
-      commentsCount: post.commentsCount,
-    }
+    return this.mapPost(post)
   }
 
   async createPost(postData: CreatePostInput): Promise<Post> {
@@ -150,23 +127,6 @@ export class PgPostRepository implements PostRepository {
       },
     })
 
-    return {
-      id: post.id,
-      userId: post.userId,
-      authorName: post.author.displayName,
-      authorUsername: post.author.username,
-      authorAvatarUrl: post.author.avatarUrl || undefined,
-      media: post.media.map((m: any) => ({
-        id: m.id,
-        url: this.toProxiedUrl(m.url) as string,
-        type: m.type,
-        order: m.order,
-      })),
-      caption: post.caption,
-      tag: post.tag,
-      createdAt: post.createdAt.toISOString(),
-      likesCount: post.likesCount,
-      commentsCount: post.commentsCount,
-    }
+    return this.mapPost(post)
   }
 }

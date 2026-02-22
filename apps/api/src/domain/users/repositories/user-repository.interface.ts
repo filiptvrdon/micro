@@ -9,7 +9,7 @@ export interface UserRepository {
   getFollowers(userId: string): Promise<User[]>
   updateUser(userId: string, data: { username?: string; displayName?: string; bio?: string; avatarUrl?: string }): Promise<User>
   searchUsers(query: string): Promise<User[]>
-  getNewUsers(limit: number): Promise<User[]>
+  getUsers(limit?: number): Promise<User[]>
   followUser(followerId: string, followingId: string): Promise<void>
   unfollowUser(followerId: string, followingId: string): Promise<void>
   isFollowing(followerId: string, followingId: string): Promise<boolean>

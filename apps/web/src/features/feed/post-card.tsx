@@ -56,7 +56,7 @@ export function PostCard({ post }: PostCardProps) {
       <CardHeader className="flex flex-row items-center space-x-4 p-0 pb-4">
         <Link to={`/profile/${post.authorUsername}`} className="flex items-center space-x-4">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={post.authorAvatarUrl} />
+            <AvatarImage src={post.authorAvatarUrl} crossOrigin="anonymous" />
             <AvatarFallback>{post.authorName[0]}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
@@ -108,12 +108,24 @@ export function PostCard({ post }: PostCardProps) {
               }}
             >
               {post.media.map((item, idx) => (
-                <div key={item.id} className="flex-none w-full h-full snap-center">
-                  <img
-                    src={item.url}
-                    alt={`Post media ${idx + 1}`}
-                    className="object-cover w-full h-full"
-                  />
+                <div key={item.id} className="flex-none w-full h-full snap-center relative">
+                  {item.type === "video" ? (
+                    <video
+                      src={item.url}
+                      controls
+                      className="object-cover w-full h-full"
+                      preload="metadata"
+                      playsInline
+                      crossOrigin="anonymous"
+                    />
+                  ) : (
+                    <img
+                      src={item.url}
+                      alt={`Post media ${idx + 1}`}
+                      className="object-cover w-full h-full"
+                      crossOrigin="anonymous"
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -122,6 +134,7 @@ export function PostCard({ post }: PostCardProps) {
               src={post.imageUrl}
               alt="Post image"
               className="object-cover w-full h-full"
+              crossOrigin="anonymous"
             />
           ) : null}
 

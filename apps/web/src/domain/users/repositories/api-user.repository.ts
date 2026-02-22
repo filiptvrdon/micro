@@ -95,11 +95,12 @@ export class ApiUserRepository implements UserRepository {
     return response.json()
   }
 
-  async getNewUsers(limit: number): Promise<User[]> {
-    const response = await fetch(`${API_URL}/api/users/new?limit=${limit}`, {
+  async getUsers(limit?: number): Promise<User[]> {
+    const url = limit ? `${API_URL}/api/users?limit=${limit}` : `${API_URL}/api/users`
+    const response = await fetch(url, {
       headers: this.getAuthHeaders()
     })
-    if (!response.ok) throw new Error("Failed to fetch new users")
+    if (!response.ok) throw new Error("Failed to fetch users")
     return response.json()
   }
 
