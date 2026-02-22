@@ -1,4 +1,4 @@
-# 💾 Data Philosophy
+# 💾 FINITE. - Data Philosophy
 
 Store only what is necessary to operate. No behavioral tracking or metadata harvesting.
 

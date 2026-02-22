@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="micro-ui-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="finite-ui-theme">
       <App />
     </ThemeProvider>
   </StrictMode>,

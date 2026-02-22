@@ -1,6 +1,8 @@
-# Micro
+# FINITE.
 
-A lightweight social media application built with a modern split architecture (Frontend + Backend).
+A lightweight social media application (**FINITE.**) built with a modern split architecture (Frontend + Backend), optimized for focus and intentionality.
+
+The primary typeface used across the interface is **JetBrains Mono**.
 
 ## 🏗 Architecture
 
@@ -29,7 +31,7 @@ The project follows a **Domain-Driven Feature** architecture. For a detailed bre
    DATABASE_HOST=localhost
    DATABASE_USER=user
    DATABASE_PASSWORD=password
-   DATABASE_NAME=micro_db
+   DATABASE_NAME=finite_db
    DATABASE_PORT=5432
    HANKO_AUTH_URL="https://your-hanko-url.hanko.io"
    VITE_API_URL="http://localhost:3000"

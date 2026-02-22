@@ -1,4 +1,4 @@
-# 🎨 UX/UI Guidelines
+# 🎨 FINITE. - UX/UI Guidelines
 
 ## 🕊 Product Feel
 Calm and intentional. "Check friends' training, then log off."
@@ -11,8 +11,8 @@ Calm and intentional. "Check friends' training, then log off."
 
 ## 🧠 Interaction (Anti-Casino)
 - **No Autoplay**: Tap to play only.
-- **Finite Feed**: Show "You're caught up" state; no "suggested for you".
-- **Typography**: Reading-friendly; captions feel like training journal notes.
+- **FINITE.** Feed: Show "You're caught up" state; no "suggested for you".
+- **Typography**: **JetBrains Mono**; reading-friendly; captions feel like training journal notes.
 
 ## 🛠 Components (shadcn/ui)
 Card, Button, Tabs, Dialog/Sheet, Toast, Avatar, Dropdown.

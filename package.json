@@ -1,5 +1,5 @@
 {
-  "name": "micro",
+  "name": "finite",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,16 +10,16 @@
     "apps/*"
   ],
   "scripts": {
-    "dev:web": "npm run dev -w @micro/web",
-    "dev:api": "npm run dev -w @micro/api",
-    "build": "npm -w @micro/web run build && npm -w @micro/api run build && npm -w @micro/api run copy:web",
-    "build:web": "npm run build -w @micro/web",
-    "build:api": "npm run build -w @micro/api",
-    "start": "npm -w @micro/api start",
-    "start:api": "npm start -w @micro/api",
+    "dev:web": "npm run dev -w @finite/web",
+    "dev:api": "npm run dev -w @finite/api",
+    "build": "npm -w @finite/web run build && npm -w @finite/api run build && npm -w @finite/api run copy:web",
+    "build:web": "npm run build -w @finite/web",
+    "build:api": "npm run build -w @finite/api",
+    "start": "npm -w @finite/api start",
+    "start:api": "npm start -w @finite/api",
     "lint": "eslint .",
     "check-arch": "depcruise apps/web apps/api",
-    "preview": "npm run preview -w @micro/web"
+    "preview": "npm run preview -w @finite/web"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",

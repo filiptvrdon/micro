@@ -21,6 +21,8 @@ This is the primary entry point for coding agents. For product/UI details, see [
 **Enforcement**: `npm run check-arch` (uses `dependency-cruiser`).
 
 ## 🛠 Tech Constraints
+- **Name**: The project name is **FINITE.** (all caps, with a period at the end).
+- **Typography**: The primary font is **JetBrains Mono**.
 - **UI**: Use `shadcn/ui` ONLY.
 - **Data**: All repositories MUST be interfaces; swap implementations via providers.
 - **Verification**: `npm run build` from root (builds web + api, copies assets).

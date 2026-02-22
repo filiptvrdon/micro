@@ -11,7 +11,7 @@ export function LoginPage() {
       <div className="w-full max-w-md space-y-8 text-center">
         <div>
           <h2 className="mt-6 text-3xl font-extrabold tracking-tight">
-            Sign in to Micro
+            Sign in to FINITE.
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Use your passkey to log in or register

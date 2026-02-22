@@ -1,6 +1,6 @@
-# 🏗 System Design
+# 🏗 FINITE. - System Design
 
-Detailed technical map of Micro.
+Detailed technical map of **FINITE.**
 
 ## 🏛 Architecture: Domain-Driven Feature (DDF)
 - **Frontend**: React (SPA), Vite, Tailwind, shadcn/ui.

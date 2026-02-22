@@ -25,7 +25,7 @@ export function AppLayout() {
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center">
       {/* Top Header */}
       <header className="w-full max-w-md flex justify-between items-center py-6 px-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Micro</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">FINITE.</h1>
         <div className="flex items-center space-x-2">
           <ThemeToggle />
           <DropdownMenu>
@@ -80,7 +80,7 @@ export function AppLayout() {
 
       {/* Footer Branding */}
       <footer className="w-full max-w-md py-8 text-center opacity-30 pointer-events-none">
-        <span className="text-xs tracking-widest uppercase">Micro</span>
+        <span className="text-xs tracking-widest uppercase">FINITE.</span>
       </footer>
     </div>
   )

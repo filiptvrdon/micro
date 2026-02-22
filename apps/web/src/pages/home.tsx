@@ -11,7 +11,7 @@ export function HomePage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center">
       {/* Landing Header */}
       <header className="w-full max-w-4xl flex justify-between items-center py-6 px-6">
-        <h1 className="text-2xl font-bold tracking-tight">Micro</h1>
+        <h1 className="text-2xl font-bold tracking-tight">FINITE.</h1>
         <div className="flex items-center space-x-4">
           <ThemeToggle />
           {session ? (
@@ -63,7 +63,7 @@ export function HomePage() {
             </div>
             <h3 className="text-xl font-semibold">Signal over noise</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Finite consumption by design. When you reach the end of your chronological feed, you’re done.
+              **FINITE.** consumption by design. When you reach the end of your chronological feed, you’re done.
               No algorithmic manipulation, no "For You" page, and no suggested posts.
             </p>
           </div>
@@ -140,7 +140,7 @@ export function HomePage() {
       {/* Footer */}
       <footer className="w-full py-12 border-t border-border/50 text-center">
         <div className="text-xs tracking-widest uppercase opacity-30 pointer-events-none">
-          Micro
+          FINITE.
         </div>
       </footer>
     </div>
