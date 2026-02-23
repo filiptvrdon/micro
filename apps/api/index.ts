@@ -3,6 +3,7 @@ import { serve } from "@hono/node-server"
 import { serveStatic } from "@hono/node-server/serve-static"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
+import { logger } from "hono/logger"
 import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { hankoAuth } from "./src/domain/auth/middleware/hanko-auth.middleware.js"
@@ -17,6 +18,7 @@ const app = new Hono<{
 }>()
 
 app.use("/*", cors())
+app.use("/*", logger())
 app.use("/*", async (c, next) => {
   await next()
   c.header("Cross-Origin-Embedder-Policy", "require-corp")
@@ -66,6 +68,8 @@ app.post("/api/posts/media", hankoAuth, async (c) => {
   const caption = typeof form["caption"] === "string" ? form["caption"] : ""
   const tag = typeof form["tag"] === "string" ? form["tag"] : "General"
 
+  console.log(`[API] Creating post with media: userId=${userId}, mediaCount=${media.length}, caption="${caption.substring(0, 50)}${caption.length > 50 ? "..." : ""}", tag="${tag}"`)
+
   const validMedia = media.filter((m): m is File => typeof m !== "string" && !!(m && typeof m.arrayBuffer === "function"))
 
   if (validMedia.length === 0) {
@@ -82,7 +86,17 @@ app.post("/api/posts/media", hankoAuth, async (c) => {
 
     const type = contentType.startsWith("video/") ? "video" : "image"
     const key = `posts/${userId}/${Date.now()}-${fileName}`
-    const { key: storedKey } = await storageRepository.uploadFile(key, buffer, contentType)
+    
+    console.log(`[API] Uploading ${type} to S3: ${fileName} (${(buffer.length / 1024 / 1024).toFixed(2)} MB) -> ${key}`)
+
+    let storedKey: string
+    try {
+      const result = await storageRepository.uploadFile(key, buffer, contentType)
+      storedKey = result.key
+    } catch (error) {
+      console.error(`Failed to upload file ${fileName} to S3:`, error)
+      return c.json({ error: `Failed to upload media: ${fileName}` }, 500)
+    }
 
     mediaItems.push({
       url: storedKey,
@@ -91,8 +105,14 @@ app.post("/api/posts/media", hankoAuth, async (c) => {
     })
   }
 
-  const post = await postRepository.createPost({ userId, media: mediaItems, caption, tag })
-  return c.json(post, 201)
+  try {
+    const post = await postRepository.createPost({ userId, media: mediaItems, caption, tag })
+    console.log(`[API] Post created successfully: id=${post.id}`)
+    return c.json(post, 201)
+  } catch (error) {
+    console.error("Failed to create post with media:", error)
+    return c.json({ error: "Failed to create post in database" }, 500)
+  }
 })
 
 // Users

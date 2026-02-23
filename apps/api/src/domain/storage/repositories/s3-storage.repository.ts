@@ -39,12 +39,18 @@ export class S3StorageRepository implements StorageRepository {
   }
 
   async uploadFile(key: string, file: Buffer, contentType: string): Promise<UploadResult> {
-    await this.client.send(new PutObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-      Body: file,
-      ContentType: contentType,
-    }));
+    try {
+      await this.client.send(new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: file,
+        ContentType: contentType,
+      }));
+      console.log(`[S3] Successfully uploaded: ${key}`);
+    } catch (error) {
+      console.error("S3 upload error details:", error);
+      throw error;
+    }
 
     return { key, url: this.objectUrl(key) };
   }

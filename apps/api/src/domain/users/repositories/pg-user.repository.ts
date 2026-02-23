@@ -26,29 +26,27 @@ export class PgUserRepository implements UserRepository {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapUser(user: any): User {
+    const apiURL = (process.env.API_URL || "http://localhost:3000").replace(/\/+$/, "")
+    const proxiedAvatar = this.toProxiedUrl(user.avatarUrl)
     return {
       id: user.id,
       username: user.username,
       displayName: user.displayName,
-      avatarUrl: this.toProxiedUrl(user.avatarUrl) || undefined,
+      avatarUrl: proxiedAvatar ? `${apiURL}${proxiedAvatar}` : undefined,
       bio: user.bio || undefined,
     }
   }
 
   async ensureUserExists(userId: string): Promise<void> {
-    const user = await prisma.user.findUnique({
+    await prisma.user.upsert({
       where: { id: userId },
+      update: {},
+      create: {
+        id: userId,
+        username: `user_${userId.slice(0, 8)}`,
+        displayName: `User ${userId.slice(0, 4)}`,
+      },
     })
-
-    if (!user) {
-      await prisma.user.create({
-        data: {
-          id: userId,
-          username: `user_${userId.slice(0, 8)}`,
-          displayName: `User ${userId.slice(0, 4)}`,
-        },
-      })
-    }
   }
 
   async getCurrentUser(userId?: string): Promise<User | null> {

@@ -27,16 +27,17 @@ export class PgPostRepository implements PostRepository {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mapPost(post: any): Post {
+    const apiURL = (process.env.API_URL || "http://localhost:3000").replace(/\/+$/, "")
     return {
       id: post.id,
       userId: post.userId,
       authorName: post.author.displayName,
       authorUsername: post.author.username,
-      authorAvatarUrl: post.author.avatarUrl || undefined,
+      authorAvatarUrl: post.author.avatarUrl ? `${apiURL}${this.toProxiedUrl(post.author.avatarUrl)}` : undefined,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       media: post.media.map((m: any) => ({
         id: m.id,
-        url: this.toProxiedUrl(m.url) as string,
+        url: `${apiURL}${this.toProxiedUrl(m.url)}`,
         type: m.type,
         order: m.order,
       })),

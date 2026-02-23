@@ -5,15 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL || ""
 
 export class ApiUserRepository implements UserRepository {
   private getAuthHeaders(): Record<string, string> {
-    // 1. Try to get from DevAuthRepository if in DEV
-    if (import.meta.env.DEV) {
-      const isDevLoggedIn = localStorage.getItem("dev_logged_in") === "true";
-      if (isDevLoggedIn) {
-        return { "Authorization": "Bearer dev-token-secret" };
-      }
-    }
-
-    // 2. Fallback to Hanko cookie
+    // Read Hanko session cookie set by @teamhanko/hanko-elements
     const token = document.cookie
       .split("; ")
       .find((row) => row.startsWith("hanko="))

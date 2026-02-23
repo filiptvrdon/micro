@@ -90,12 +90,12 @@ export function CreatePostForm({ onCreated }: CreatePostFormProps) {
       setIsUploading(false)
 
       if (onCreated) onCreated(created)
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
       setIsUploading(false)
       toast({
         title: "Upload failed",
-        description: "There was an error uploading your post. Please try again.",
+        description: err.message || "There was an error uploading your post. Please try again.",
         variant: "destructive",
       })
     }

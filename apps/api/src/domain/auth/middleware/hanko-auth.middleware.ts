@@ -13,13 +13,6 @@ export const hankoAuth = async (c: Context, next: Next) => {
     return c.json({ error: "Unauthorized" }, 401)
   }
 
-  // Bypass for local development
-  if (process.env.NODE_ENV !== "production" && token === "dev-token-secret") {
-    const userId = "dev-user-123"
-    c.set("userId", userId)
-    await userRepository.ensureUserExists(userId)
-    return await next()
-  }
 
   if (!HANKO_AUTH_URL) {
     console.error("HANKO_AUTH_URL is not defined")
@@ -43,10 +36,8 @@ export const hankoAuth = async (c: Context, next: Next) => {
     try {
       await userRepository.ensureUserExists(userId)
     } catch (error) {
-      console.error("Failed to ensure user exists in DB:", error)
-      // We might want to continue anyway, or fail. 
-      // Given the requirement, we should probably ensure it works.
-      // If it fails due to DB issue, next() might fail later with foreign key errors.
+      console.error(`Failed to ensure user exists in DB for userId: ${userId}:`, error)
+      return c.json({ error: "Failed to persist user session" }, 500)
     }
 
     await next()

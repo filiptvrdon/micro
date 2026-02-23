@@ -1,7 +1,9 @@
 # 🎨 FINITE. - UX/UI Guidelines
 
 ## 🕊 Product Feel
-Calm and intentional. "Check friends' training, then log off."
+Calm. Principled. Confident. "Train. Log it. Leave."
+No outrage required. Reintroducing boundaries.
+Higher signal density, higher intentionality, higher reflection per minute.
 
 ## 📐 Layout Principles
 - **Mobile-First**: 360–430px is primary canvas.
@@ -12,7 +14,7 @@ Calm and intentional. "Check friends' training, then log off."
 ## 🧠 Interaction (Anti-Casino)
 - **No Autoplay**: Tap to play only.
 - **FINITE.** Feed: Show "You're caught up" state; no "suggested for you".
-- **Typography**: **JetBrains Mono**; reading-friendly; captions feel like training journal notes.
+- **Typography**: **JetBrains Mono** (default); user-selectable; reading-friendly; captions feel like training journal notes.
 
 ## 🛠 Components (shadcn/ui)
 Card, Button, Tabs, Dialog/Sheet, Toast, Avatar, Dropdown.
